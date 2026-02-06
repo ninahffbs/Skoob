@@ -21,5 +21,19 @@ public class UserController : ControllerBase
     var users = _service.GetUsers();
         return Ok(users); 
     }
+
+    [HttpPost("Create")]
+    public ActionResult<UserResponseDTO> Create(CreateUserDTO dto)
+    {
+        try
+        {
+            var user = _service.CreateUser(dto);
+            return Ok(user); 
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
     
 }
