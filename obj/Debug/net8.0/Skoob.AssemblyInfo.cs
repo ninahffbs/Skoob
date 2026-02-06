@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Skoob")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a515760c78c6c2cd7c59a766ed23bddacdcfb93f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+63421f81f27b2b3b226fe3e819d1d2f5b55ed7c7")]
 [assembly: System.Reflection.AssemblyProductAttribute("Skoob")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Skoob")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

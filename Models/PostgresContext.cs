@@ -25,10 +25,6 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<Statusbook> Statusbooks { get; set; }
 
-    public virtual DbSet<TbOrder> TbOrders { get; set; }
-
-    public virtual DbSet<TbUser> TbUsers { get; set; }
-
     public virtual DbSet<Userbook> Userbooks { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -149,57 +145,6 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
-        });
-
-        modelBuilder.Entity<TbOrder>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("tb_order_pkey");
-
-            entity.ToTable("tb_order", "sistema_pedidos");
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("created_at");
-            entity.Property(e => e.PaymentType)
-                .HasMaxLength(100)
-                .HasColumnName("payment_type");
-            entity.Property(e => e.Total)
-                .HasPrecision(10, 2)
-                .HasColumnName("total");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.User).WithMany(p => p.TbOrders)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_order_user");
-        });
-
-        modelBuilder.Entity<TbUser>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("tb_user_pkey");
-
-            entity.ToTable("tb_user", "sistema_pedidos");
-
-            entity.HasIndex(e => e.Email, "tb_user_email_key").IsUnique();
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("created_at");
-            entity.Property(e => e.Email)
-                .HasMaxLength(100)
-                .HasColumnName("email");
-            entity.Property(e => e.Name)
-                .HasMaxLength(256)
-                .HasColumnName("name");
-            entity.Property(e => e.Password)
-                .HasMaxLength(256)
-                .HasColumnName("password");
         });
 
         modelBuilder.Entity<Userbook>(entity =>

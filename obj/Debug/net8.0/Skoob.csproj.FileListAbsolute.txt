@@ -102,3 +102,4 @@
 /Users/ninafernandes/Desktop/projFinal/Skoob/obj/Debug/net8.0/Skoob.pdb
 /Users/ninafernandes/Desktop/projFinal/Skoob/obj/Debug/net8.0/Skoob.genruntimeconfig.cache
 /Users/ninafernandes/Desktop/projFinal/Skoob/obj/Debug/net8.0/ref/Skoob.dll
+/Users/ninafernandes/Desktop/projFinal/Skoob/obj/Debug/net8.0/Skoob.sourcelink.json
