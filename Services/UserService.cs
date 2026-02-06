@@ -12,19 +12,20 @@ public class UserService : IUserService
     {
         _userRepository = userRepository;
     }
+
     public List<UserResponseDTO> GetUsers()
     {
         List<Mainuser> mainUsers = _userRepository.SelectUsers();
-        List<UserResponseDTO> usersDTO = new();
+        List<UserResponseDTO> usersDTO = [];
 
-        foreach (var mainuser in mainUsers)
+        foreach (var user in mainUsers)
         {
             usersDTO.Add(new UserResponseDTO
             {
-                Id = mainuser.Id,
-                UserName = mainuser.UserName,
-                Email = mainuser.Email,
-                CreatedAt = mainuser.CreatedAt
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                CreatedAt = user.CreatedAt
             });
         }
 

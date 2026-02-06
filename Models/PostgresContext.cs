@@ -27,10 +27,6 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<Userbook> Userbooks { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=root");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Author>(entity =>
@@ -69,7 +65,7 @@ public partial class PostgresContext : DbContext
 
             entity.HasOne(d => d.Author).WithMany(p => p.Books)
                 .HasForeignKey(d => d.AuthorId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_book_author");
 
             entity.HasMany(d => d.Genres).WithMany(p => p.Books)
@@ -151,7 +147,10 @@ public partial class PostgresContext : DbContext
         {
             entity.HasKey(e => new { e.UserId, e.BookId }).HasName("pk_userbooks");
 
-            entity.ToTable("userbooks", "skoob");
+            entity.ToTable("userbooks", "skoob", t =>
+            {
+                t.HasCheckConstraint("CK_UserBooks_Rating", "rating BETWEEN 1 AND 5");
+            });
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.BookId).HasColumnName("book_id");

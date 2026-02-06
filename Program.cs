@@ -2,15 +2,19 @@ using Skoob.Models;
 using Skoob.Interfaces;
 using Skoob.Repositories;
 using Skoob.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<PostgresContext>();
+var connectionString = builder.Configuration.GetConnectionString("SkoobConnection");
+
+builder.Services.AddDbContext<PostgresContext>(options =>
+    options.UseNpgsql(connectionString));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
@@ -23,10 +27,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<PostgresContext>();
+    context.Database.EnsureCreated();
+}
 
 app.Run();
