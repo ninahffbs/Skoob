@@ -7,3 +7,8 @@ public class UserResponseDTO
     public string Email { get; set; } = null!;
     public DateTime? CreatedAt { get; set; }
 }
+
+public class UpdateUserNameRequest
+{
+    public string UserName {get;set;}
+}
