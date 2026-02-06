@@ -5,7 +5,7 @@ namespace Skoob.Models;
 
 public partial class Statusbook
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public string Status { get; set; } = null!;
 

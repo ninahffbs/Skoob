@@ -16,8 +16,10 @@ public class UserController : ControllerBase
     }
 
     [HttpGet(Name = "GetAllUsers")]
-    public List<UserResponseDTO> Get()
+    public ActionResult<List<UserResponseDTO>> Get()
     {
-        return _service.GetUsers();
+    var users = _service.GetUsers();
+        return Ok(users); 
     }
+    
 }
