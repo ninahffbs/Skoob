@@ -32,6 +32,11 @@ public class UserService : IUserService
         return usersDTO;
     }
 
+    public string UpdateUserName(Guid id, string newName)
+    {
+        return _userRepository.UpdateUserName(id, newName);
+    }
+    
      public UserResponseDTO CreateUser(CreateUserDTO createDto)
     {
         if (_userRepository.UsernameExists(createDto.UserName))
