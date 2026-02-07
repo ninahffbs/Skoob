@@ -39,4 +39,17 @@ public class UserController : ControllerBase
                 return StatusCode(500, "Erro inesperado ao atualizar usuário!");
         }
     }
+    [HttpPost("Create")]
+    public ActionResult<UserResponseDTO> Create(CreateUserDTO dto)
+    {
+        try
+        {
+            var user = _service.CreateUser(dto);
+            return Ok(user); 
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

@@ -36,4 +36,33 @@ public class UserService : IUserService
     {
         return _userRepository.UpdateUserName(id, newName);
     }
+    
+     public UserResponseDTO CreateUser(CreateUserDTO createDto)
+    {
+        if (_userRepository.UsernameExists(createDto.UserName))
+        {
+            throw new ArgumentException($"Nome de usuário '{createDto.UserName}' já está em uso");
+        }
+
+         if (_userRepository.EmailExists(createDto.Email))
+        {
+            throw new ArgumentException($"Email '{createDto.Email}' já está cadastrado");
+        }
+
+        var user = new Mainuser
+        {
+            UserName = createDto.UserName.Trim(),
+            Email = createDto.Email.Trim().ToLowerInvariant(),
+            UserPassword = createDto.Password
+        };
+
+        var createdUser = _userRepository.CreateUser(user);
+        return new UserResponseDTO
+        {
+            Id = createdUser.Id,
+            UserName = createdUser.UserName,
+            Email = createdUser.Email,
+            CreatedAt = createdUser.CreatedAt,
+        };
+    }
 }
