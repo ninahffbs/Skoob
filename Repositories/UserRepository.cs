@@ -50,4 +50,16 @@ public class UserRepository : IUserRepository
         return _context.Mainusers
             .Any(u => EF.Functions.ILike(u.Email, email)); 
     }
+
+     public bool DeleteUser(Guid id)
+    {
+        var user = _context.Mainusers.Find(id);
+
+        if (user == null)
+            return false; 
+        _context.Mainusers.Remove(user);
+        _context.SaveChanges();
+        
+        return true; 
+    }
 }
