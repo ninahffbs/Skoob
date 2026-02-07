@@ -24,19 +24,20 @@ public class UserController : ControllerBase
     }
 
     [HttpPatch("{id}", Name = "UpdateUserName")]
-    public IActionResult UpdateUser([FromRoute] Guid id, [FromBody] UpdateUserNameRequest request)
+    public IActionResult UpdateUserName([FromRoute] Guid id, [FromBody] UpdateUserNameRequest request)
     {
-        string result = _service.UpdateUserName(id, request.UserName);
-        switch (result)
+        try
         {
-            case "okay":
-                return Ok();
-            case "user_not_found":
-                return NotFound("Usuário não encontrado");
-            case "username_exists":
-                return Conflict("Esse nome de usuário já está sendo utilizado.");
-            default:
-                return StatusCode(500, "Erro inesperado ao atualizar usuário!");
+            _service.UpdateUserName(id, request.UserName);
+            return Ok(new { message = "Nome de usuário atualizado com sucesso" });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return Conflict(ex.Message);
         }
     }
     [HttpPost("Create")]
