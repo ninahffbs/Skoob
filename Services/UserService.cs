@@ -1,6 +1,7 @@
 using Skoob.DTOs;
 using Skoob.Interfaces;
 using Skoob.Models;
+using BCrypt.Net;
 
 namespace Skoob.Services;
 
@@ -36,24 +37,26 @@ public class UserService : IUserService
     {
         return _userRepository.UpdateUserName(id, newName);
     }
-    
-     public UserResponseDTO CreateUser(CreateUserDTO createDto)
+
+    public UserResponseDTO CreateUser(CreateUserDTO createDto)
     {
         if (_userRepository.UsernameExists(createDto.UserName))
         {
             throw new ArgumentException($"Nome de usuário '{createDto.UserName}' já está em uso");
         }
 
-         if (_userRepository.EmailExists(createDto.Email))
+        if (_userRepository.EmailExists(createDto.Email))
         {
             throw new ArgumentException($"Email '{createDto.Email}' já está cadastrado");
         }
+
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(createDto.Password);
 
         var user = new Mainuser
         {
             UserName = createDto.UserName.Trim(),
             Email = createDto.Email.Trim().ToLowerInvariant(),
-            UserPassword = createDto.Password
+            UserPassword = passwordHash
         };
 
         var createdUser = _userRepository.CreateUser(user);
