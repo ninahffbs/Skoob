@@ -9,4 +9,5 @@ public interface IUserRepository
     public Mainuser CreateUser(Mainuser user);
     public bool UsernameExists(string username);
     public bool EmailExists(string email);
+    public  bool DeleteUser(Guid id);
 }
