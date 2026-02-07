@@ -2,6 +2,8 @@ using Skoob.DTOs;
 using Skoob.Interfaces;
 using Skoob.Models;
 using BCrypt.Net;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Skoob.Services;
 
@@ -33,9 +35,26 @@ public class UserService : IUserService
         return usersDTO;
     }
 
-    public string UpdateUserName(Guid id, string newName)
+    public void UpdateUserName(Guid id, string newName)
     {
-        return _userRepository.UpdateUserName(id, newName);
+        var user = _userRepository.GetUserById(id);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"Usuário com ID '{id}' não encontrado");
+        }
+        if (_userRepository.UsernameExists(newName))
+        {
+            throw new ArgumentException($"Nome de usuário '{newName}' já está em uso");
+        }
+        user.UserName = newName.Trim();
+        try
+        {
+            _userRepository.UpdateUserName(user);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+        {
+            throw new ArgumentException($"Nome de usuário '{newName}' já está em uso");
+        }
     }
 
     public UserResponseDTO CreateUser(CreateUserDTO createDto)
