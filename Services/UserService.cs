@@ -106,6 +106,9 @@ public class UserService : IUserService
 
     public bool DeleteUser(Guid id)
     {
+        var user = _userRepository.GetUserById(id);
+
+
         return _userRepository.DeleteUser(id);
     }
 }

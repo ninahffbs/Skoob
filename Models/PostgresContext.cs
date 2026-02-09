@@ -125,7 +125,7 @@ public partial class PostgresContext : DbContext
                 .HasMaxLength(15)
                 .HasColumnName("user_name");
             entity.Property(e => e.UserPassword)
-                .HasMaxLength(32)
+                .HasMaxLength(100)
                 .HasColumnName("user_password");
         });
 
