@@ -7,14 +7,9 @@ using Npgsql;
 
 namespace Skoob.Services;
 
-public class UserService : IUserService
+public class UserService(IUserRepository userRepository) : IUserService
 {
-    private readonly IUserRepository _userRepository;
-
-    public UserService(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
+    private readonly IUserRepository _userRepository = userRepository;
 
     public List<UserResponseDTO> GetUsers()
     {
@@ -37,7 +32,7 @@ public class UserService : IUserService
 
     public UserResponseDTO? GetUserById(Guid id)
     {
-        var user = _userRepository.GetUserById(id);
+        var user = _userRepository.GetById(id);
         
         if (user == null)
             return null;
@@ -51,9 +46,26 @@ public class UserService : IUserService
         };
     }
 
+    public UserResponseDTO? GetByUserName(string userName)
+    {
+        var user = _userRepository.GetByName(userName);
+
+        if (user == null) return null;
+
+        return new UserResponseDTO
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            CreatedAt = user.CreatedAt,
+            TotalBooks = user.Userbooks.Count,
+            BooksRead = user.Userbooks.Count(ub => ub.FinishDate != null)
+        };
+    }
+
     public void UpdateUserName(Guid id, string newName)
     {
-        var user = _userRepository.GetUserById(id);
+        var user = _userRepository.GetById(id);
         if (user == null)
         {
             throw new KeyNotFoundException($"Usuário com ID '{id}' não encontrado");
@@ -94,7 +106,7 @@ public class UserService : IUserService
             UserPassword = passwordHash
         };
 
-        var createdUser = _userRepository.CreateUser(user);
+        var createdUser = _userRepository.Register(user);
         return new UserResponseDTO
         {
             Id = createdUser.Id,
@@ -105,7 +117,7 @@ public class UserService : IUserService
     }
     public void UpdatePassword(Guid id, UpdatePasswordDTO dto)
     {
-        var user = _userRepository.GetUserById(id);
+        var user = _userRepository.GetById(id);
         if (user == null)
         {
             throw new KeyNotFoundException($"Usuário com ID '{id}' não encontrado");
@@ -122,9 +134,8 @@ public class UserService : IUserService
     
     public bool DeleteUser(Guid id)
     {
-        var user = _userRepository.GetUserById(id);
-
-
+        var user = _userRepository.GetById(id) ?? throw new ArgumentException($"Usuário com ID {id} não encontrado");
+        
         return _userRepository.DeleteUser(id);
     }
 }

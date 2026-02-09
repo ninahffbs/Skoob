@@ -16,8 +16,8 @@ public class UserController : ControllerBase
         _service = service;
     }
 
-    [HttpGet(Name = "GetAllUsers")]
-    public ActionResult<List<UserResponseDTO>> Get()
+    [HttpGet("all", Name = "GetAllUsers")]
+    public ActionResult<List<UserResponseDTO>> GetAll()
     {
         var users = _service.GetUsers();
         return Ok(users);
@@ -34,7 +34,18 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-   [HttpPatch("{id}/username", Name = "UpdateUserName")]
+    [HttpGet("profile/{username}")]
+    public ActionResult<UserResponseDTO> GetProfile(string username)
+    {
+        var user = _service.GetByUserName(username);
+        
+        if (user == null)
+            return NotFound(new { error = $"Usuário '{username}' não encontrado" });
+        
+        return Ok(user);
+    }
+
+    [HttpPatch("{id}/username", Name = "UpdateUserName")]
     public IActionResult UpdateUserName([FromRoute] Guid id, [FromBody] UpdateUserNameRequest request)
     {
         try
@@ -51,7 +62,7 @@ public class UserController : ControllerBase
             return Conflict(ex.Message);
         }
     }
-    [HttpPost("Create")]
+    [HttpPost("create")]
     public ActionResult<UserResponseDTO> Create(CreateUserDTO dto)
     {
         try
@@ -83,7 +94,7 @@ public class UserController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("delete/{id}")]
     public ActionResult Delete(Guid id)
     {
         var deleted = _service.DeleteUser(id);

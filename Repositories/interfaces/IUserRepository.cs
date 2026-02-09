@@ -4,9 +4,10 @@ namespace Skoob.Interfaces;
 public interface IUserRepository
 {
     public List<Mainuser> SelectUsers();
-    public Mainuser? GetUserById(Guid id);
+    public Mainuser? GetById(Guid id);
+    public Mainuser? GetByName(string username);
     public void UpdateUserName(Mainuser mainuser);
-    public Mainuser CreateUser(Mainuser user);
+    public Mainuser Register(Mainuser user);
     public bool UsernameExists(string username);
     public bool EmailExists(string email);
     public void UpdatePassword(Mainuser user);
