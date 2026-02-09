@@ -19,7 +19,7 @@ public class UserRepository : IUserRepository
         List<Mainuser> mainUsers = _context.Mainusers.ToList();
         return mainUsers;
     }
-    
+
     public Mainuser? GetUserById(Guid id)
     {
         Mainuser? foundUser = _context.Mainusers.Find(id);
@@ -32,7 +32,7 @@ public class UserRepository : IUserRepository
         _context.SaveChanges();
     }
 
-     public Mainuser CreateUser(Mainuser user)
+    public Mainuser CreateUser(Mainuser user)
     {
         _context.Mainusers.Add(user);
         _context.SaveChanges();
@@ -48,7 +48,13 @@ public class UserRepository : IUserRepository
     public bool EmailExists(string email)
     {
         return _context.Mainusers
-            .Any(u => EF.Functions.ILike(u.Email, email)); 
+            .Any(u => EF.Functions.ILike(u.Email, email));
+    }
+
+    public void UpdatePassword(Mainuser user)
+    {
+        _context.Mainusers.Update(user);
+        _context.SaveChanges();
     }
 
      public bool DeleteUser(Guid id)

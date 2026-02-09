@@ -34,7 +34,7 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPatch("{id}", Name = "UpdateUserName")]
+   [HttpPatch("{id}/username", Name = "UpdateUserName")]
     public IActionResult UpdateUserName([FromRoute] Guid id, [FromBody] UpdateUserNameRequest request)
     {
         try
@@ -57,11 +57,29 @@ public class UserController : ControllerBase
         try
         {
             var user = _service.CreateUser(dto);
-            return Ok(user); 
+            return Ok(user);
         }
         catch (ArgumentException ex)
         {
             return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPatch("{id}/password", Name = "UpdatePassword")]
+    public IActionResult UpdatePassword([FromRoute] Guid id, [FromBody] UpdatePasswordDTO dto)
+    {
+        try
+        {
+            _service.UpdatePassword(id, dto);
+            return Ok(new { message = "Senha do usuário atualizada com sucesso!" });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return Conflict(ex.Message);
         }
     }
 

@@ -103,7 +103,23 @@ public class UserService : IUserService
             CreatedAt = createdUser.CreatedAt,
         };
     }
+    public void UpdatePassword(Guid id, UpdatePasswordDTO dto)
+    {
+        var user = _userRepository.GetUserById(id);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"Usuário com ID '{id}' não encontrado");
+        }
+        var passwordMatches = BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.UserPassword);
 
+        if (!passwordMatches)
+        {
+            throw new ArgumentException("Senha atual digitada incorreta!");
+        }
+        user.UserPassword = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        _userRepository.UpdatePassword(user);
+    }
+    
     public bool DeleteUser(Guid id)
     {
         var user = _userRepository.GetUserById(id);
