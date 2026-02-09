@@ -19,11 +19,20 @@ public class UserRepository : IUserRepository
         List<Mainuser> mainUsers = _context.Mainusers.ToList();
         return mainUsers;
     }
-
-    public Mainuser? GetUserById(Guid id)
+    
+    public Mainuser? GetById(Guid id)
     {
         Mainuser? foundUser = _context.Mainusers.Find(id);
         return foundUser;
+    }
+
+    public Mainuser? GetByName(string username)
+    {
+        return _context.Mainusers
+        .AsNoTracking()
+        .Include(u => u.Userbooks)
+        .ThenInclude(ub => ub.Book)
+        .FirstOrDefault(u => EF.Functions.ILike(u.UserName, username));
     }
 
     public void UpdateUserName(Mainuser user)
@@ -32,7 +41,7 @@ public class UserRepository : IUserRepository
         _context.SaveChanges();
     }
 
-    public Mainuser CreateUser(Mainuser user)
+     public Mainuser Register(Mainuser user)
     {
         _context.Mainusers.Add(user);
         _context.SaveChanges();
