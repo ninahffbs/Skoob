@@ -62,6 +62,10 @@ public class UserController : ControllerBase
             return Conflict(ex.Message);
         }
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2e278cb (feat: improve signup & add get profile endpoint)
     [HttpPost("create")]
     public ActionResult<UserResponseDTO> Create(CreateUserDTO dto)
     {
@@ -76,6 +80,7 @@ public class UserController : ControllerBase
         }
     }
 
+<<<<<<< HEAD
     [HttpPatch("{id}/password", Name = "UpdatePassword")]
     public IActionResult UpdatePassword([FromRoute] Guid id, [FromBody] UpdatePasswordDTO dto)
     {
@@ -94,6 +99,8 @@ public class UserController : ControllerBase
         }
     }
 
+=======
+>>>>>>> 2e278cb (feat: improve signup & add get profile endpoint)
     [HttpDelete("delete/{id}")]
     public ActionResult Delete(Guid id)
     {
