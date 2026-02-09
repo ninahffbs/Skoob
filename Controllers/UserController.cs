@@ -23,6 +23,17 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
+    [HttpGet("{id}", Name = "GetUserById")]
+    public ActionResult<UserResponseDTO> GetById(Guid id)
+    {
+        var user = _service.GetUserById(id);
+
+        if (user == null)
+            return NotFound(new { error = $"Usuário com ID {id} não encontrado" });
+
+        return Ok(user);
+    }
+
     [HttpPatch("{id}", Name = "UpdateUserName")]
     public IActionResult UpdateUserName([FromRoute] Guid id, [FromBody] UpdateUserNameRequest request)
     {
@@ -52,5 +63,16 @@ public class UserController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpDelete("{id}")]
+    public ActionResult Delete(Guid id)
+    {
+        var deleted = _service.DeleteUser(id);
+
+        if (!deleted)
+            return NotFound(new { error = $"Usuário com ID {id} não encontrado" });
+
+        return Ok(new { message = "Usuário deletado com sucesso" });
     }
 }

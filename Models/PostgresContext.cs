@@ -125,7 +125,7 @@ public partial class PostgresContext : DbContext
                 .HasMaxLength(15)
                 .HasColumnName("user_name");
             entity.Property(e => e.UserPassword)
-                .HasMaxLength(32)
+                .HasMaxLength(100)
                 .HasColumnName("user_password");
         });
 
@@ -171,14 +171,17 @@ public partial class PostgresContext : DbContext
 
             entity.HasOne(d => d.Book).WithMany(p => p.Userbooks)
                 .HasForeignKey(d => d.BookId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_user_books_book");
 
             entity.HasOne(d => d.Status).WithMany(p => p.Userbooks)
                 .HasForeignKey(d => d.StatusId)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_user_books_status");
 
             entity.HasOne(d => d.User).WithMany(p => p.Userbooks)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_user_books_user");
         });
 
