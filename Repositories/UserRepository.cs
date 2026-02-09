@@ -56,4 +56,16 @@ public class UserRepository : IUserRepository
         _context.Mainusers.Update(user);
         _context.SaveChanges();
     }
+
+     public bool DeleteUser(Guid id)
+    {
+        var user = _context.Mainusers.Find(id);
+
+        if (user == null)
+            return false; 
+        _context.Mainusers.Remove(user);
+        _context.SaveChanges();
+        
+        return true; 
+    }
 }

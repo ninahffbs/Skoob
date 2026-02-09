@@ -35,6 +35,22 @@ public class UserService : IUserService
         return usersDTO;
     }
 
+    public UserResponseDTO? GetUserById(Guid id)
+    {
+        var user = _userRepository.GetUserById(id);
+        
+        if (user == null)
+            return null;
+
+        return new UserResponseDTO
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            CreatedAt = user.CreatedAt,
+        };
+    }
+
     public void UpdateUserName(Guid id, string newName)
     {
         var user = _userRepository.GetUserById(id);
@@ -102,5 +118,13 @@ public class UserService : IUserService
         }
         user.UserPassword = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
         _userRepository.UpdatePassword(user);
+    }
+    
+    public bool DeleteUser(Guid id)
+    {
+        var user = _userRepository.GetUserById(id);
+
+
+        return _userRepository.DeleteUser(id);
     }
 }

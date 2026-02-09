@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Skoob.Models;
 
+[Table("userbooks", Schema = "skoob")]
 public partial class Userbook
 {
     public Guid UserId { get; set; }
