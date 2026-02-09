@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Skoob.DTOs;
 using Skoob.Interfaces;
 
@@ -16,7 +17,7 @@ public class UserController : ControllerBase
         _service = service;
     }
 
-    [HttpGet("all", Name = "GetAllUsers")]
+    [HttpGet(Name = "GetAllUsers")]
     public ActionResult<List<UserResponseDTO>> GetAll()
     {
         var users = _service.GetUsers();
@@ -63,7 +64,7 @@ public class UserController : ControllerBase
         }
     }
     
-    [HttpPost("create")]
+    [HttpPost]
     public ActionResult<UserResponseDTO> Create(CreateUserDTO dto)
     {
         try
@@ -95,7 +96,7 @@ public class UserController : ControllerBase
         }
     }
 
-    [HttpDelete("delete/{id}")]
+    [HttpDelete("{id}")]
     public ActionResult Delete(Guid id)
     {
         var deleted = _service.DeleteUser(id);
