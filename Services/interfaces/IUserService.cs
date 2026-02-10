@@ -4,7 +4,7 @@ namespace Skoob.Interfaces;
 
 public interface IUserService
 {
-    public List<UserResponseDTO> GetUsers();
+    public List<UserResponseDTO> GetUsers(int page);
     public void UpdateUserName(Guid id, string newName);
     public UserResponseDTO? GetUserById(Guid id);
     public UserResponseDTO? GetByUserName(string userName);

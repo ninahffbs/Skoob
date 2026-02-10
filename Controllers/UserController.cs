@@ -18,11 +18,12 @@ public class UserController : ControllerBase
     }
 
     [HttpGet(Name = "GetAllUsers")]
-    public ActionResult<List<UserResponseDTO>> GetAll()
+    public ActionResult<List<UserResponseDTO>> GetAll([FromQuery] int page = 1)
     {
-        var users = _service.GetUsers();
+        var users = _service.GetUsers(page);
         return Ok(users);
     }
+
 
     [HttpGet("{id}", Name = "GetUserById")]
     public ActionResult<UserResponseDTO> GetById(Guid id)

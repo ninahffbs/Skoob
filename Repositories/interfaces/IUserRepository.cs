@@ -3,7 +3,7 @@ namespace Skoob.Interfaces;
 
 public interface IUserRepository
 {
-    public List<Mainuser> SelectUsers();
+    public List<Mainuser> SelectUsers(int page, int pageSize);
     public Mainuser? GetById(Guid id);
     public Mainuser? GetByName(string username);
     public void UpdateUserName(Mainuser mainuser);

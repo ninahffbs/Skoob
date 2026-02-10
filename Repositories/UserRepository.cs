@@ -14,11 +14,15 @@ public class UserRepository : IUserRepository
     {
         _context = context;
     }
-    public List<Mainuser> SelectUsers()
+    public List<Mainuser> SelectUsers(int page, int pageSize)
     {
-        List<Mainuser> mainUsers = _context.Mainusers.ToList();
-        return mainUsers;
+        return _context.Mainusers
+            .OrderBy(u => u.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
     }
+
     
     public Mainuser? GetById(Guid id)
     {

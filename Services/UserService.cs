@@ -6,29 +6,36 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace Skoob.Services;
-
-public class UserService(IUserRepository userRepository) : IUserService
+public class UserService : IUserService
 {
-    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly int _pageSize;
 
-    public List<UserResponseDTO> GetUsers()
+    public UserService(
+        IUserRepository userRepository,
+        IConfiguration configuration)
     {
-        List<Mainuser> mainUsers = _userRepository.SelectUsers();
-        List<UserResponseDTO> usersDTO = [];
-
-        foreach (var user in mainUsers)
-        {
-            usersDTO.Add(new UserResponseDTO
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            });
-        }
-
-        return usersDTO;
+        _userRepository = userRepository;
+        _pageSize = configuration.GetValue<int>("Pagination:UsersPageSize");
     }
+
+    public List<UserResponseDTO> GetUsers(int page)
+    {
+        if (page <= 0)
+            page = 1;
+
+        var mainUsers = _userRepository.SelectUsers(page, _pageSize);
+
+        return mainUsers.Select(user => new UserResponseDTO
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            CreatedAt = user.CreatedAt
+        }).ToList();
+    }
+
+
 
     public UserResponseDTO? GetUserById(Guid id)
     {
