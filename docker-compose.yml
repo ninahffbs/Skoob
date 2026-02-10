@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:18
+    container_name: skoob
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: skoob_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+volumes:
+  pgdata:
