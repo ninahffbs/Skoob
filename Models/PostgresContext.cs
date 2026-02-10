@@ -189,4 +189,5 @@ public partial class PostgresContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
 }
