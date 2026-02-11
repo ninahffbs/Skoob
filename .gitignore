@@ -4,6 +4,7 @@ bin/
 obj/
 .vscode/
 .DS_Store
+.env
 
 .vs/
 *.user
