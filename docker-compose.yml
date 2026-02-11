@@ -1,16 +1,24 @@
 services:
   db:
-    image: postgres:18
+    image: postgres:18-alpine
     container_name: skoob
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+      TZ: America/Sao_Paulo
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - skoob-net
   api:
     build: .
     container_name: skoob_api
@@ -18,8 +26,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__SkoobConnection: "Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      TZ: America/Sao_Paulo
     ports:
       - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - skoob-net
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: skoob_pgadmin
@@ -31,5 +45,10 @@ services:
       - "5050:80"
     depends_on:
       - db
+    networks:
+      - skoob-net
 volumes:
   pgdata:
+networks:
+  skoob-net:
+    driver: bridge
