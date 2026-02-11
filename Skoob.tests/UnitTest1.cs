@@ -43,8 +43,8 @@ public class UpdatePasswordDTOTests
         var dto = new UpdatePasswordDTO
         {
             OldPassword = "OldPassword123",
-            NewPassword = "NewStrongPassword123",
-            ConfirmNewPassword = "NewStrongPassword123" 
+            NewPassword = "NewStrong@Password123",
+            ConfirmNewPassword = "NewStrong@Password123" 
         };
 
  
