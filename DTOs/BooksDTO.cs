@@ -12,5 +12,5 @@ public class BookDTO
     public string? Synopsis { get; set; }
     public int PublishedDate { get; set; }
 
-
+    // falta continuar adicionar author, genres 
 }
