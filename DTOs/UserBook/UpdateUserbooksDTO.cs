@@ -9,6 +9,7 @@ public class UpdateUserbooksDTO
     public int? PagesRead { get; set; }
 
     [Required(ErrorMessage = "Status é obrigatório")]    
+    [Range(0, 2, ErrorMessage = "O status deve estar entre 0 (Lendo), 1 (Lido) ou 2 (Quero Ler).")]
     public StatusBook Status { get; set; }
     
     public DateTime? StartDate { get; set; }

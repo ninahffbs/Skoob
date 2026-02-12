@@ -35,8 +35,6 @@ public class UserService : IUserService
         }).ToList();
     }
 
-
-
     public UserResponseDTO? GetUserById(Guid id)
     {
         var user = _userRepository.GetById(id);
@@ -66,7 +64,21 @@ public class UserService : IUserService
             Email = user.Email,
             CreatedAt = user.CreatedAt,
             TotalBooks = user.Userbooks.Count,
-            BooksRead = user.Userbooks.Count(ub => ub.FinishDate != null)
+            BooksRead = user.Userbooks.Count(ub => ub.FinishDate != null),
+
+            Books = user.Userbooks.Select(ub => new UserBookSimpleDTO
+            {
+                BookTitle = ub.Book.Title, 
+                PagesRead = ub.PagesRead ?? 0,
+            
+                PercentComplete = ub.Book.PagesNumber > 0 
+                    ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber) 
+                    : 0,
+                
+                Status = ub.Status.ToString(), 
+                StartedAt = ub.StartDate 
+            }).ToList()
+            
         };
     }
 
