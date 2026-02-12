@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Skoob.Interfaces;
 using Skoob.Models;
-using Npgsql;
-using System.Diagnostics.Tracing;
 
 namespace Skoob.Repositories;
 

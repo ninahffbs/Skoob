@@ -1,6 +1,4 @@
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Skoob.DTOs;
 using Skoob.Interfaces;
 

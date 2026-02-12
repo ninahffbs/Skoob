@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Skoob.Enums;
 
 namespace Skoob.DTOs;
 
@@ -6,8 +7,9 @@ public class UpdateUserbooksDTO
 {
      [Range(0, int.MaxValue, ErrorMessage = "Páginas lidas deve ser >= 0")]
     public int? PagesRead { get; set; }
-    
-    public int? StatusId { get; set; }
+
+    [Required(ErrorMessage = "Status é obrigatório")]    
+    public StatusBook Status { get; set; }
     
     public DateTime? StartDate { get; set; }
     

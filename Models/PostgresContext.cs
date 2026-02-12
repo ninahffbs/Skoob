@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Skoob.Models;
 
 public partial class PostgresContext : DbContext
 {
-    public PostgresContext()
-    {
-    }
+    public PostgresContext(){}
 
-    public PostgresContext(DbContextOptions<PostgresContext> options)
-        : base(options)
-    {
-    }
+    public PostgresContext(DbContextOptions<PostgresContext> options) : base(options){}
 
     public virtual DbSet<Author> Authors { get; set; }
 
@@ -22,8 +15,6 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<Genre> Genres { get; set; }
 
     public virtual DbSet<Mainuser> Mainusers { get; set; }
-
-    public virtual DbSet<Statusbook> Statusbooks { get; set; }
 
     public virtual DbSet<Userbook> Userbooks { get; set; }
 
@@ -129,20 +120,6 @@ public partial class PostgresContext : DbContext
                 .HasColumnName("user_password");
         });
 
-        modelBuilder.Entity<Statusbook>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("statusbooks_pkey");
-
-            entity.ToTable("statusbooks", "skoob");
-
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasColumnName("status");
-        });
-
         modelBuilder.Entity<Userbook>(entity =>
         {
             entity.HasKey(e => new { e.UserId, e.BookId }).HasName("pk_userbooks");
@@ -167,21 +144,20 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.StartDate)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("start_date");
-            entity.Property(e => e.StatusId).HasColumnName("status_id");
+            entity.Property(e => e.Status)
+                .HasConversion<string>() 
+                .HasColumnName("status");
 
-            entity.HasOne(d => d.Book).WithMany(p => p.Userbooks)
+            entity.HasOne(d => d.Book)
+                .WithMany(p => p.Userbooks)
                 .HasForeignKey(d => d.BookId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_user_books_book");
 
-            entity.HasOne(d => d.Status).WithMany(p => p.Userbooks)
-                .HasForeignKey(d => d.StatusId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("fk_user_books_status");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Userbooks)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Userbooks)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.SetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_user_books_user");
         });
 
