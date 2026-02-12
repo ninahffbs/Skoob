@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Skoob.Enums;
 
 namespace Skoob.Models;
 
@@ -25,7 +26,7 @@ public partial class Userbook
 
     public virtual Book Book { get; set; } = null!;
 
-    public virtual Statusbook? Status { get; set; }
+    public StatusBook Status { get; set; }
 
     public virtual Mainuser User { get; set; } = null!;
 }
