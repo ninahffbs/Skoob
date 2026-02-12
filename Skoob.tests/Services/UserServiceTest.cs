@@ -1,6 +1,7 @@
 using Moq;
 using NUnit.Framework;
 using Microsoft.Extensions.Configuration;
+using System.ComponentModel.DataAnnotations;
 using Skoob.Interfaces;
 using Skoob.Services;
 using Skoob.Models;
@@ -25,6 +26,32 @@ public class UserServiceTest
         _service = new UserService(
             _repositoryMock.Object,
             configuration);
+    }
+
+    private IList<ValidationResult> ValidateModel(object model)
+    {
+        var validationResults = new List<ValidationResult>();
+        var ctx = new ValidationContext(model, null, null);
+        Validator.TryValidateObject(model, ctx, validationResults, true);
+        return validationResults;
+    }
+
+    [Test]
+    public void Should_Fail_When_Confirmation_Does_Not_Match_NewPassword()
+    {
+        // Arrange
+        var dto = new UpdatePasswordDTO 
+        { 
+            OldPassword = "OldPassword123", 
+            NewPassword = "NewStrong@Password123", 
+            ConfirmNewPassword = "Diferente@123" 
+        };
+
+        // Act
+        var errors = ValidateModel(dto);
+
+        // Assert
+        Assert.That(errors, Is.Not.Empty, "O validador deveria ter retornado erro por senhas não coincidentes.");
     }
 
     [Test]

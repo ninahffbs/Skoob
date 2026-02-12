@@ -79,4 +79,9 @@ public class UserRepository : IUserRepository
         
         return true; 
     }
+
+    public bool Exists(Guid id)
+    {
+        return _context.Mainusers.Any(u => u.Id == id);
+    }
 }

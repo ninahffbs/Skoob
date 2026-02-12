@@ -145,8 +145,8 @@ public partial class PostgresContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("start_date");
             entity.Property(e => e.Status)
-                .HasConversion<string>() 
-                .HasColumnName("status");
+                .HasColumnName("status")
+                .HasConversion<string>();
 
             entity.HasOne(d => d.Book)
                 .WithMany(p => p.Userbooks)

@@ -18,6 +18,11 @@ builder.Services.AddDbContext<PostgresContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<IUserbookRepository, UserbookRepository>();
+builder.Services.AddScoped<IUserServiceBook, UserbookService>();
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); // desliga o que impede de salvar em UTC a hora no banco
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,10 +32,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
-
+app.UseHttpsRedirection();
 app.UseAuthorization();
-
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())

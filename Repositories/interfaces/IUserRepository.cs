@@ -13,4 +13,5 @@ public interface IUserRepository
     public bool EmailExists(string email);
     public void UpdatePassword(Mainuser user);
     public  bool DeleteUser(Guid id);
+    public bool Exists(Guid id);
 }
