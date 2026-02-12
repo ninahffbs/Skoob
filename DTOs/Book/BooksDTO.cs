@@ -11,6 +11,6 @@ public class BookDTO
     [MaxLength(500, ErrorMessage = "Sinopse não pode ter mais de 500 caracteres")]
     public string? Synopsis { get; set; }
     public int PublishedDate { get; set; }
-
-    // falta continuar adicionar author, genres 
+     public string? AuthorName { get; set; }
+    public List<string> Genres { get; set; } = new();
 }
