@@ -4,6 +4,7 @@ using Skoob.Interfaces;
 using Skoob.Models;
 
 namespace Skoob.Services;
+
 public class UserbookService : IUserServiceBook
 {
     private readonly IUserbookRepository _userbookRepository;
@@ -28,12 +29,12 @@ public class UserbookService : IUserServiceBook
         if (dto.Status == StatusBook.QueroLer)
         {
             startDate = null;
-        } 
+        }
         else
         {
             startDate = startDate ?? DateTime.UtcNow;
         }
-        
+
         // regra 1 usuario existe?
         if (!_userRepository.Exists(userId)) throw new ArgumentException($"Usuário com ID {userId} Não encontrado");
 
@@ -41,7 +42,7 @@ public class UserbookService : IUserServiceBook
         if (!_userbookRepository.BookExists(dto.BookId)) throw new ArgumentException($"Livro com id {dto.BookId} nNão encontrado");
 
         // regra 3 usuario ja tem o livro?
-        if (_userbookRepository.UserHasBook(userId, dto.BookId)) throw new ArgumentException("Você já tem esse livro adicionado.");;
+        if (_userbookRepository.UserHasBook(userId, dto.BookId)) throw new ArgumentException("Você já tem esse livro adicionado."); ;
 
         var book = _userbookRepository.GetBookById(dto.BookId);
 
@@ -88,16 +89,16 @@ public class UserbookService : IUserServiceBook
         {
             BookId = ub.BookId,
             BookTitle = ub.Book.Title,
-            BookPages = ub.Book.PagesNumber, 
+            BookPages = ub.Book.PagesNumber,
             AuthorName = ub.Book.Author?.Name,
             PagesRead = ub.PagesRead ?? 0,
-            PercentComplete = ub.Book.PagesNumber > 0 
+            PercentComplete = ub.Book.PagesNumber > 0
                 ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber)
                 : 0,
-                
+
             Status = ub.Status,
             StatusName = GetStatusName(ub.Status),
-            
+
             StartDate = ub.StartDate,
             FinishDate = ub.FinishDate,
             Rating = ub.Rating,
@@ -119,8 +120,35 @@ public class UserbookService : IUserServiceBook
     public void RemoveUserBook(Guid userId, Guid bookId)
     {
         var deleted = _userbookRepository.DeleteUserBook(userId, bookId);
-        
+
         if (!deleted) throw new ArgumentException("Este livro não existe na biblioteca deste usuário");
+    }
+
+    public void UpdateReadPages(Guid userId, Guid bookId, int newPages)
+    {
+        if (newPages < 0)
+        {
+            throw new ArgumentException("O número de páginas não pode ser negativo");
+        }
+        var userBook = _userbookRepository.GetUserbook(userId, bookId);
+        var book = _userbookRepository.GetBookById(bookId);
+
+        if (newPages > book.PagesNumber)
+        {
+            throw new ArgumentException($"Este livro possui apenas {book.PagesNumber} páginas");
+        }
+        userBook.PagesRead = newPages;
+
+        if (newPages == book.PagesNumber)
+        {
+            userBook.Status = StatusBook.Lido;
+            userBook.FinishDate = DateTime.UtcNow;
+        }
+        else if (newPages > 0)
+        {
+            userBook.Status = StatusBook.Lendo;
+        }
+        _userbookRepository.UpdateReadPages(userBook);
     }
 
 }

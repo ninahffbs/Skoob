@@ -24,22 +24,22 @@ public class UserbookRepository : IUserbookRepository
     {
         return _context.Userbooks
             .AsNoTracking()
-            .Include(ub => ub.Book)          
-            .ThenInclude(b => b.Author)  
+            .Include(ub => ub.Book)
+            .ThenInclude(b => b.Author)
             .Where(ub => ub.UserId == userId)
             .OrderByDescending(ub => ub.StartDate)
             .ToList();
     }
 
     public bool BookExists(Guid bookId) => _context.Books.Any(b => b.Id == bookId);
-    public bool UserHasBook(Guid userId, Guid bookId) => 
+    public bool UserHasBook(Guid userId, Guid bookId) =>
     _context.Userbooks.Any(ub => ub.UserId == userId && ub.BookId == bookId);
 
     public Userbook? GetUserbook(Guid userId, Guid bookId)
     {
         return _context.Userbooks
-            .Include(ub => ub.Book) 
-            .ThenInclude(b => b.Author) 
+            .Include(ub => ub.Book)
+            .ThenInclude(b => b.Author)
             .FirstOrDefault(ub => ub.UserId == userId && ub.BookId == bookId);
     }
 
@@ -50,18 +50,22 @@ public class UserbookRepository : IUserbookRepository
 
     public Userbook? GetUserBookById(Guid userBookId)
     {
-        return _context.Userbooks.FirstOrDefault(ub => ub.BookId == userBookId); 
+        return _context.Userbooks.FirstOrDefault(ub => ub.BookId == userBookId);
     }
 
     public bool DeleteUserBook(Guid userId, Guid bookId)
     {
         var userbook = _context.Userbooks.FirstOrDefault(ub => ub.UserId == userId && ub.BookId == bookId);
 
-        if (userbook == null) return false; 
+        if (userbook == null) return false;
 
         _context.Userbooks.Remove(userbook);
         _context.SaveChanges();
         return true;
     }
-
+    public void UpdateReadPages(Userbook userbook)
+    {
+        _context.Userbooks.Update(userbook);
+        _context.SaveChanges();
+    }
 }
