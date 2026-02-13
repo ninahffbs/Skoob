@@ -74,4 +74,18 @@ public class UserBookController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    
+    [HttpPatch("user/{userId}/book/{bookId}/rating")]
+    public IActionResult AddRating(Guid userId, Guid bookId, [FromBody] AddRatingDTO dto)
+    {
+        try
+        {
+            _userBookService.AddRating(userId, bookId, dto.Rating!.Value);
+            return Ok(new { message = "Avaliação atualizada com sucesso!" });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }

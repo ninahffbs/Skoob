@@ -13,4 +13,5 @@ public interface IUserbookRepository
     public Userbook? GetUserBookById(Guid userBookId);
     public bool DeleteUserBook(Guid userId, Guid bookId);
     public void UpdateReadPages(Userbook userbook);
+    public void AddRating(Userbook userbook);
 }

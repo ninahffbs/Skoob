@@ -8,4 +8,5 @@ public interface IUserServiceBook
     public List<UserbookResponseDTO> GetUserBooks(Guid userId);
     public void RemoveUserBook(Guid userId, Guid bookId);
     public void UpdateReadPages(Guid userId, Guid bookId, int newPages);
+    public void AddRating(Guid userId, Guid bookId, int rating);
 } 

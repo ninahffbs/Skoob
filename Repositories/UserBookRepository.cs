@@ -68,4 +68,9 @@ public class UserbookRepository : IUserbookRepository
         _context.Userbooks.Update(userbook);
         _context.SaveChanges();
     }
+    public void AddRating(Userbook userbook)
+    {
+        _context.Userbooks.Update(userbook);
+        _context.SaveChanges();
+    }
 }

@@ -150,5 +150,22 @@ public class UserbookService : IUserServiceBook
         }
         _userbookRepository.UpdateReadPages(userBook);
     }
+    
+    public void AddRating(Guid userId, Guid bookId, int rating)
+    {
+        if (rating < 0)
+        {
+            throw new ArgumentException("A avaliação deve estar entre 1 e 5.");
+        }
 
+        var userBook = _userbookRepository.GetUserbook(userId, bookId);
+
+        if (userBook.Status != StatusBook.Lido)
+        {
+            throw new ArgumentException("Você não pode avaliar um livro que ainda não finalizou");
+        }
+        
+        userBook.Rating = (short)rating;
+        _userbookRepository.AddRating(userBook);
+    }
 }
