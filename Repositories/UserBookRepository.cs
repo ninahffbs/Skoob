@@ -73,4 +73,15 @@ public class UserbookRepository : IUserbookRepository
         _context.Userbooks.Update(userbook);
         _context.SaveChanges();
     }
+
+    public List<Book> GetAllBooks(int page, int pageSize)
+    {
+        return _context.Books
+            .Include(b => b.Author)
+            .Include(b => b.Genres)
+            .OrderBy(b => b.Title)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
 }

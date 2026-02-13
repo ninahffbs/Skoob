@@ -9,4 +9,5 @@ public interface IUserServiceBook
     public void RemoveUserBook(Guid userId, Guid bookId);
     public void UpdateReadPages(Guid userId, Guid bookId, int newPages);
     public void AddRating(Guid userId, Guid bookId, int rating);
+    public List<BookDTO> GetAllBooks(int page);
 } 

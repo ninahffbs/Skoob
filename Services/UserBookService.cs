@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Skoob.DTOs;
 using Skoob.Enums;
 using Skoob.Interfaces;
@@ -9,13 +10,16 @@ public class UserbookService : IUserServiceBook
 {
     private readonly IUserbookRepository _userbookRepository;
     private readonly IUserRepository _userRepository;
+    private readonly int _pageSize;
 
     public UserbookService(
         IUserbookRepository userbookRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IConfiguration configuration)
     {
         _userbookRepository = userbookRepository;
         _userRepository = userRepository;
+        _pageSize = configuration.GetValue<int>("Pagination:UsersPageSize");
     }
 
     public UserbookResponseDTO AddBookUser(Guid userId, AddBooksUserDTO dto)
@@ -150,7 +154,7 @@ public class UserbookService : IUserServiceBook
         }
         _userbookRepository.UpdateReadPages(userBook);
     }
-    
+
     public void AddRating(Guid userId, Guid bookId, int rating)
     {
         if (rating < 0)
@@ -164,8 +168,26 @@ public class UserbookService : IUserServiceBook
         {
             throw new ArgumentException("Você não pode avaliar um livro que ainda não finalizou");
         }
-        
+
         userBook.Rating = (short)rating;
         _userbookRepository.AddRating(userBook);
+    }
+    public List<BookDTO> GetAllBooks(int page)
+    {
+        if (page <= 0)
+            page = 1;
+        
+        var books = _userbookRepository.GetAllBooks(page, _pageSize);
+
+        return books.Select(b => new BookDTO
+        {
+            Id = b.Id,
+            Title = b.Title,
+            Pages = b.PagesNumber,
+            Synopsis = b.Synopsis,
+            PublishedDate = b.PublishingYear,
+            AuthorName = b.Author?.Name,
+            Genres = b.Genres.Select(g => g.Name).ToList()
+        }).ToList();
     }
 }

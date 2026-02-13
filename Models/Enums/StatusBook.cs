@@ -2,7 +2,7 @@ namespace Skoob.Enums;
 
 public enum StatusBook
 {
-    Lido,
     Lendo,
+    Lido,
     QueroLer,
 }

@@ -74,7 +74,7 @@ public class UserBookController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
-    
+
     [HttpPatch("user/{userId}/book/{bookId}/rating")]
     public IActionResult AddRating(Guid userId, Guid bookId, [FromBody] AddRatingDTO dto)
     {
@@ -87,5 +87,12 @@ public class UserBookController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+
+    [HttpGet("books")]
+    public ActionResult<List<BookDTO>> GetAllBooks([FromQuery] int page = 1)
+    {
+        var books = _userBookService.GetAllBooks(page);
+        return Ok(books);
     }
 }
