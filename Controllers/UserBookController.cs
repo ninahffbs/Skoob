@@ -67,7 +67,7 @@ public class UserBookController : ControllerBase
         try
         {
             _userBookService.UpdateReadPages(userId, bookId, dto.PagesRead);
-            return NoContent();
+            return Ok(new { message = "Páginas atualizadas com sucesso!" });
         }
         catch (ArgumentException ex)
         {
