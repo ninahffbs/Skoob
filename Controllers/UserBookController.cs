@@ -9,7 +9,7 @@ namespace Skoob.Controllers;
 [Route("[controller]")]
 public class UserBookController : ControllerBase
 {
-    private IUserServiceBook _userBookService; 
+    private IUserServiceBook _userBookService;
 
     public UserBookController(IUserServiceBook userBookService)
     {
@@ -52,14 +52,47 @@ public class UserBookController : ControllerBase
     {
         try
         {
-            _userBookService.RemoveUserBook(userId, bookId); 
+            _userBookService.RemoveUserBook(userId, bookId);
             return Ok(new { message = "Livro deletado com sucesso do usuário" });
-        }   
+        }
         catch (ArgumentException ex)
         {
             return NotFound(new { message = ex.Message });
         }
     }
 
-    
+    [HttpPatch("user/{userId}/book/{bookId}/pages")]
+    public IActionResult UpdateReadPages(Guid userId, Guid bookId, [FromBody] UpdateReadPagesDTO dto)
+    {
+        try
+        {
+            _userBookService.UpdateReadPages(userId, bookId, dto.PagesRead);
+            return Ok(new { message = "Páginas atualizadas com sucesso!" });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPatch("user/{userId}/book/{bookId}/rating")]
+    public IActionResult AddRating(Guid userId, Guid bookId, [FromBody] AddRatingDTO dto)
+    {
+        try
+        {
+            _userBookService.AddRating(userId, bookId, dto.Rating!.Value);
+            return Ok(new { message = "Avaliação atualizada com sucesso!" });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpGet("books")]
+    public ActionResult<List<BookDTO>> GetAllBooks([FromQuery] int page = 1)
+    {
+        var books = _userBookService.GetAllBooks(page);
+        return Ok(books);
+    }
 }

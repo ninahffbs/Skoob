@@ -1,20 +1,25 @@
+using System.Collections.Concurrent;
 using Skoob.DTOs;
 using Skoob.Enums;
 using Skoob.Interfaces;
 using Skoob.Models;
 
 namespace Skoob.Services;
+
 public class UserbookService : IUserServiceBook
 {
     private readonly IUserbookRepository _userbookRepository;
     private readonly IUserRepository _userRepository;
+    private readonly int _pageSize;
 
     public UserbookService(
         IUserbookRepository userbookRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IConfiguration configuration)
     {
         _userbookRepository = userbookRepository;
         _userRepository = userRepository;
+        _pageSize = configuration.GetValue<int>("Pagination:UsersPageSize");
     }
 
     public UserbookResponseDTO AddBookUser(Guid userId, AddBooksUserDTO dto)
@@ -28,12 +33,12 @@ public class UserbookService : IUserServiceBook
         if (dto.Status == StatusBook.QueroLer)
         {
             startDate = null;
-        } 
+        }
         else
         {
             startDate = startDate ?? DateTime.UtcNow;
         }
-        
+
         // regra 1 usuario existe?
         if (!_userRepository.Exists(userId)) throw new ArgumentException($"Usuário com ID {userId} Não encontrado");
 
@@ -41,7 +46,7 @@ public class UserbookService : IUserServiceBook
         if (!_userbookRepository.BookExists(dto.BookId)) throw new ArgumentException($"Livro com id {dto.BookId} nNão encontrado");
 
         // regra 3 usuario ja tem o livro?
-        if (_userbookRepository.UserHasBook(userId, dto.BookId)) throw new ArgumentException("Você já tem esse livro adicionado.");;
+        if (_userbookRepository.UserHasBook(userId, dto.BookId)) throw new ArgumentException("Você já tem esse livro adicionado."); ;
 
         var book = _userbookRepository.GetBookById(dto.BookId);
 
@@ -88,16 +93,16 @@ public class UserbookService : IUserServiceBook
         {
             BookId = ub.BookId,
             BookTitle = ub.Book.Title,
-            BookPages = ub.Book.PagesNumber, 
+            BookPages = ub.Book.PagesNumber,
             AuthorName = ub.Book.Author?.Name,
             PagesRead = ub.PagesRead ?? 0,
-            PercentComplete = ub.Book.PagesNumber > 0 
+            PercentComplete = ub.Book.PagesNumber > 0
                 ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber)
                 : 0,
-                
+
             Status = ub.Status,
             StatusName = GetStatusName(ub.Status),
-            
+
             StartDate = ub.StartDate,
             FinishDate = ub.FinishDate,
             Rating = ub.Rating,
@@ -119,8 +124,70 @@ public class UserbookService : IUserServiceBook
     public void RemoveUserBook(Guid userId, Guid bookId)
     {
         var deleted = _userbookRepository.DeleteUserBook(userId, bookId);
-        
+
         if (!deleted) throw new ArgumentException("Este livro não existe na biblioteca deste usuário");
     }
 
+    public void UpdateReadPages(Guid userId, Guid bookId, int newPages)
+    {
+        if (newPages < 0)
+        {
+            throw new ArgumentException("O número de páginas não pode ser negativo");
+        }
+        var userBook = _userbookRepository.GetUserbook(userId, bookId);
+        var book = _userbookRepository.GetBookById(bookId);
+
+        if (newPages > book.PagesNumber)
+        {
+            throw new ArgumentException($"Este livro possui apenas {book.PagesNumber} páginas");
+        }
+        userBook.PagesRead = newPages;
+
+        if (newPages == book.PagesNumber)
+        {
+            userBook.Status = StatusBook.Lido;
+            userBook.FinishDate = DateTime.UtcNow;
+        }
+        else if (newPages > 0)
+        {
+            userBook.Status = StatusBook.Lendo;
+        }
+        _userbookRepository.UpdateReadPages(userBook);
+    }
+
+    public void AddRating(Guid userId, Guid bookId, int rating)
+    {
+        if (rating < 0)
+        {
+            throw new ArgumentException("A avaliação deve estar entre 1 e 5.");
+        }
+
+        var userBook = _userbookRepository.GetUserbook(userId, bookId);
+
+        if (userBook.Status != StatusBook.Lido)
+        {
+            throw new ArgumentException("Você não pode avaliar um livro que ainda não finalizou");
+        }
+
+        userBook.Rating = (short)rating;
+        _userbookRepository.AddRating(userBook);
+    }
+    public List<BookDTO> GetAllBooks(int page)
+    {
+        if (page <= 0)
+            page = 1;
+        
+        var books = _userbookRepository.GetAllBooks(page, _pageSize);
+
+        return books.Select(b => new BookDTO
+        {
+            Id = b.Id,
+            Title = b.Title,
+            Pages = b.PagesNumber,
+            Synopsis = b.Synopsis,
+            PublishedDate = b.PublishingYear,
+            AuthorName = b.Author?.Name,
+            Genres = b.Genres.Select(g => g.Name).ToList()
+        }).ToList();
+    }
 }
