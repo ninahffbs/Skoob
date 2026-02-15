@@ -12,4 +12,5 @@ public interface IUserServiceBook
     public List<BookDTO> GetAllBooks(int page);
     public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle);
     public List<BookDTO> FilterBookByTitle(string searchedTitle, int page);
+    public List<UserbookResponseDTO> FilterUserBookByGenre(Guid userId, string searchedGenre);
 } 

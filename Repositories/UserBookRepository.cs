@@ -25,7 +25,9 @@ public class UserbookRepository : IUserbookRepository
         return _context.Userbooks
             .AsNoTracking()
             .Include(ub => ub.Book)
-            .ThenInclude(b => b.Author)
+                .ThenInclude(b => b.Author)
+            .Include(ub => ub.Book)
+                .ThenInclude(b => b.Genres)
             .Where(ub => ub.UserId == userId)
             .OrderByDescending(ub => ub.StartDate)
             .ToList();

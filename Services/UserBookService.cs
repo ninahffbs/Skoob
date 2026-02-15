@@ -211,7 +211,7 @@ public class UserbookService : IUserServiceBook
 
         return filteredBooks;
     }
-    
+
     public List<BookDTO> FilterBookByTitle(string searchedTitle, int page)
     {
         if (page <= 0)
@@ -241,6 +241,31 @@ public class UserbookService : IUserServiceBook
                     .Select(g => g.Name)
                     .ToList()
             })
+            .ToList();
+
+        return filteredBooks;
+    }
+
+    public List<UserbookResponseDTO> FilterUserBookByGenre(Guid userId, string searchedGenre)
+    {
+        if (string.IsNullOrWhiteSpace(searchedGenre) || searchedGenre.Length < 3)
+        {
+            throw new ArgumentException("O gênero buscado deve ter pelo menos 3 caracteres.");
+        }
+
+        var user = _userRepository.GetById(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Usuário com esse id não foi encontrado.");
+        }
+
+        var userBooks = _userbookRepository.GetUserbooksByUserId(userId);
+
+        var filteredBooks = userBooks
+            .Where(ub => ub.Book.Genres
+                .Any(g => g.Name
+                    .Contains(searchedGenre, StringComparison.OrdinalIgnoreCase)))
+            .Select(ub => MapToDTO(ub))
             .ToList();
 
         return filteredBooks;
