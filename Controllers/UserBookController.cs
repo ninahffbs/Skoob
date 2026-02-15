@@ -131,17 +131,17 @@ public class UserBookController : ControllerBase
         }
     }
     
-    // [HttpGet("filter/genre")]
-    // public IActionResult FilterBookByGenre([FromQuery] string searchedGenre, [FromQuery] int page)
-    // {
-    //     try
-    //     {
-    //         var result = _userBookService.FilterBookByGenre(searchedGenre, page);
-    //         return Ok(result);
-    //     }
-    //     catch (ArgumentException ex)
-    //     {
-    //         return BadRequest(new { error = ex.Message });
-    //     }
-    // }
+    [HttpGet("filter/genre")]
+    public IActionResult FilterBookByGenre([FromQuery] string searchedGenre, [FromQuery] int page = 1)
+    {
+        try
+        {
+            var result = _userBookService.FilterBookByGenre(searchedGenre, page);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }

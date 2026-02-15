@@ -270,4 +270,39 @@ public class UserbookService : IUserServiceBook
 
         return filteredBooks;
     }
+    //FilterBookByGenre
+    public List<BookDTO> FilterBookByGenre(string searchedGenre, int page)
+    {
+        if (page <= 0)
+        {
+            page = 1;
+        }
+
+        if (string.IsNullOrWhiteSpace(searchedGenre) || searchedGenre.Length < 3)
+        {
+            throw new ArgumentException("O gênero buscado deve ter pelo menos 3 caracteres.");
+        }
+
+        var books = _userbookRepository.GetAllBooks(page, _pageSize);
+
+        var filteredBooks = books
+            .Where(b => b.Genres
+                .Any(g => g.Name
+                    .Contains(searchedGenre, StringComparison.OrdinalIgnoreCase)))
+            .Select(b => new BookDTO
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Pages = b.PagesNumber,
+                Synopsis = b.Synopsis,
+                PublishedDate = b.PublishingYear,
+                AuthorName = b.Author.Name,
+                Genres = b.Genres
+                    .Select(g => g.Name)
+                    .ToList()
+            })
+            .ToList();
+
+        return filteredBooks;
+    }
 }
