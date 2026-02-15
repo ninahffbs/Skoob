@@ -176,7 +176,7 @@ public class UserbookService : IUserServiceBook
     {
         if (page <= 0)
             page = 1;
-        
+
         var books = _userbookRepository.GetAllBooks(page, _pageSize);
 
         return books.Select(b => new BookDTO
@@ -189,5 +189,26 @@ public class UserbookService : IUserServiceBook
             AuthorName = b.Author?.Name,
             Genres = b.Genres.Select(g => g.Name).ToList()
         }).ToList();
+    }
+    //FilterByTitle
+    public List<UserbookResponseDTO> FilterByTitle(Guid userId, string searchedTitle)
+    {
+        if (string.IsNullOrWhiteSpace(searchedTitle) || searchedTitle.Length < 3)
+        {
+            throw new ArgumentException("O título deve ter pelo menos 3 caracteres.");
+        }
+        var user = _userRepository.GetById(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Usuário com esse id não foi encontrado.");
+        }
+        var userBooks = _userbookRepository.GetUserbooksByUserId(userId);
+
+        var filteredBooks = userBooks
+            .Where(ub => ub.Book.Title
+                .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
+            .Select(ub => MapToDTO(ub)).ToList();
+
+        return filteredBooks;
     }
 }

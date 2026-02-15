@@ -95,4 +95,18 @@ public class UserBookController : ControllerBase
         var books = _userBookService.GetAllBooks(page);
         return Ok(books);
     }
+
+    [HttpGet("user/{userId}/book/filter")]
+    public IActionResult FilterByTitle(Guid userId, [FromQuery] string searchedTitle)
+    {
+        try
+        {
+            var result = _userBookService.FilterByTitle(userId, searchedTitle);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }
