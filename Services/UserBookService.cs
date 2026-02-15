@@ -191,7 +191,7 @@ public class UserbookService : IUserServiceBook
         }).ToList();
     }
     //FilterByTitle
-    public List<UserbookResponseDTO> FilterByTitle(Guid userId, string searchedTitle)
+    public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle)
     {
         if (string.IsNullOrWhiteSpace(searchedTitle) || searchedTitle.Length < 3)
         {
@@ -208,6 +208,40 @@ public class UserbookService : IUserServiceBook
             .Where(ub => ub.Book.Title
                 .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
             .Select(ub => MapToDTO(ub)).ToList();
+
+        return filteredBooks;
+    }
+    
+    public List<BookDTO> FilterBookByTitle(string searchedTitle, int page)
+    {
+        if (page <= 0)
+        {
+            page = 1;
+        }
+
+        if (string.IsNullOrWhiteSpace(searchedTitle) || searchedTitle.Length < 3)
+        {
+            throw new ArgumentException("O título deve ter pelo menos 3 caracteres.");
+        }
+
+        var books = _userbookRepository.GetAllBooks(page, _pageSize);
+
+        var filteredBooks = books
+            .Where(b => b.Title
+                .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
+            .Select(b => new BookDTO
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Pages = b.PagesNumber,
+                Synopsis = b.Synopsis,
+                PublishedDate = b.PublishingYear,
+                AuthorName = b.Author.Name,
+                Genres = b.Genres
+                    .Select(g => g.Name)
+                    .ToList()
+            })
+            .ToList();
 
         return filteredBooks;
     }

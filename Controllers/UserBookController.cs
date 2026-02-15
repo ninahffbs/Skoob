@@ -96,17 +96,24 @@ public class UserBookController : ControllerBase
         return Ok(books);
     }
 
-    [HttpGet("user/{userId}/book/filter")]
-    public IActionResult FilterByTitle(Guid userId, [FromQuery] string searchedTitle)
+    [HttpGet("user/{userId}/userbook/filter")]
+    public IActionResult FilterUserBookByTitle(Guid userId, [FromQuery] string searchedTitle)
     {
         try
         {
-            var result = _userBookService.FilterByTitle(userId, searchedTitle);
+            var result = _userBookService.FilterUserBookByTitle(userId, searchedTitle);
             return Ok(result);
         }
         catch (ArgumentException ex)
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+
+    [HttpGet("book/filter")]
+    public IActionResult FilterBookByTitle([FromQuery] string searchedTitle, [FromQuery] int page = 1)
+    {
+        var books = _userBookService.FilterBookByTitle(searchedTitle, page);
+        return Ok(books);
     }
 }

@@ -10,5 +10,6 @@ public interface IUserServiceBook
     public void UpdateReadPages(Guid userId, Guid bookId, int newPages);
     public void AddRating(Guid userId, Guid bookId, int rating);
     public List<BookDTO> GetAllBooks(int page);
-    public List<UserbookResponseDTO> FilterByTitle(Guid userId, string searchedTitle);
+    public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle);
+    public List<BookDTO> FilterBookByTitle(string searchedTitle, int page);
 } 
