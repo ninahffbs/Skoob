@@ -45,11 +45,6 @@ public class UserbookRepository : IUserbookRepository
             .FirstOrDefault(ub => ub.UserId == userId && ub.BookId == bookId);
     }
 
-    public Book GetBookById(Guid bookId)
-    {
-        return _context.Books.FirstOrDefault(b => b.Id == bookId) ?? throw new ArgumentException("Livro não encontrado no catálogo");
-    }
-
     public Userbook? GetUserBookById(Guid userBookId)
     {
         return _context.Userbooks.FirstOrDefault(ub => ub.BookId == userBookId);
@@ -76,14 +71,5 @@ public class UserbookRepository : IUserbookRepository
         _context.SaveChanges();
     }
 
-    public List<Book> GetAllBooks(int page, int pageSize)
-    {
-        return _context.Books
-            .Include(b => b.Author)
-            .Include(b => b.Genres)
-            .OrderBy(b => b.Title)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-    }
+    
 }

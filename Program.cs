@@ -21,6 +21,15 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserbookRepository, UserbookRepository>();
 builder.Services.AddScoped<IUserServiceBook, UserbookService>();
 
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookService, BookService>();
+
+
+// builder.Services.AddScoped<UserbookService>();
+
+
+
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); // desliga o que impede de salvar em UTC a hora no banco
 
 var app = builder.Build();

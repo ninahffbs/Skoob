@@ -9,9 +9,6 @@ public interface IUserServiceBook
     public void RemoveUserBook(Guid userId, Guid bookId);
     public void UpdateReadPages(Guid userId, Guid bookId, int newPages);
     public void AddRating(Guid userId, Guid bookId, int rating);
-    public List<BookDTO> GetAllBooks(int page);
     public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle);
-    public List<BookDTO> FilterBookByTitle(string searchedTitle, int page);
     public List<UserbookResponseDTO> FilterUserBookByGenre(Guid userId, string searchedGenre);
-    public List<BookDTO> FilterBookByGenre(string searchedGenre, int page);
 } 

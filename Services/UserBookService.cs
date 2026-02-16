@@ -10,15 +10,18 @@ public class UserbookService : IUserServiceBook
 {
     private readonly IUserbookRepository _userbookRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IBookRepository _bookRepository;
     private readonly int _pageSize;
 
     public UserbookService(
         IUserbookRepository userbookRepository,
         IUserRepository userRepository,
+        IBookRepository bookRepository,
         IConfiguration configuration)
     {
         _userbookRepository = userbookRepository;
         _userRepository = userRepository;
+        _bookRepository = bookRepository;
         _pageSize = configuration.GetValue<int>("Pagination:UsersPageSize");
     }
 
@@ -48,7 +51,7 @@ public class UserbookService : IUserServiceBook
         // regra 3 usuario ja tem o livro?
         if (_userbookRepository.UserHasBook(userId, dto.BookId)) throw new ArgumentException("Você já tem esse livro adicionado."); ;
 
-        var book = _userbookRepository.GetBookById(dto.BookId);
+        var book = _bookRepository.GetBookById(dto.BookId);
 
         if (dto.PagesRead > book.PagesNumber)
         {
@@ -135,7 +138,7 @@ public class UserbookService : IUserServiceBook
             throw new ArgumentException("O número de páginas não pode ser negativo");
         }
         var userBook = _userbookRepository.GetUserbook(userId, bookId);
-        var book = _userbookRepository.GetBookById(bookId);
+        var book = _bookRepository.GetBookById(bookId);
 
         if (newPages > book.PagesNumber)
         {
@@ -172,24 +175,7 @@ public class UserbookService : IUserServiceBook
         userBook.Rating = (short)rating;
         _userbookRepository.AddRating(userBook);
     }
-    public List<BookDTO> GetAllBooks(int page)
-    {
-        if (page <= 0)
-            page = 1;
-
-        var books = _userbookRepository.GetAllBooks(page, _pageSize);
-
-        return books.Select(b => new BookDTO
-        {
-            Id = b.Id,
-            Title = b.Title,
-            Pages = b.PagesNumber,
-            Synopsis = b.Synopsis,
-            PublishedDate = b.PublishingYear,
-            AuthorName = b.Author?.Name,
-            Genres = b.Genres.Select(g => g.Name).ToList()
-        }).ToList();
-    }
+ 
     //FilterByTitle
     public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle)
     {
@@ -208,40 +194,6 @@ public class UserbookService : IUserServiceBook
             .Where(ub => ub.Book.Title
                 .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
             .Select(ub => MapToDTO(ub)).ToList();
-
-        return filteredBooks;
-    }
-
-    public List<BookDTO> FilterBookByTitle(string searchedTitle, int page)
-    {
-        if (page <= 0)
-        {
-            page = 1;
-        }
-
-        if (string.IsNullOrWhiteSpace(searchedTitle) || searchedTitle.Length < 3)
-        {
-            throw new ArgumentException("O título deve ter pelo menos 3 caracteres.");
-        }
-
-        var books = _userbookRepository.GetAllBooks(page, _pageSize);
-
-        var filteredBooks = books
-            .Where(b => b.Title
-                .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
-            .Select(b => new BookDTO
-            {
-                Id = b.Id,
-                Title = b.Title,
-                Pages = b.PagesNumber,
-                Synopsis = b.Synopsis,
-                PublishedDate = b.PublishingYear,
-                AuthorName = b.Author.Name,
-                Genres = b.Genres
-                    .Select(g => g.Name)
-                    .ToList()
-            })
-            .ToList();
 
         return filteredBooks;
     }
@@ -270,39 +222,5 @@ public class UserbookService : IUserServiceBook
 
         return filteredBooks;
     }
-    //FilterBookByGenre
-    public List<BookDTO> FilterBookByGenre(string searchedGenre, int page)
-    {
-        if (page <= 0)
-        {
-            page = 1;
-        }
-
-        if (string.IsNullOrWhiteSpace(searchedGenre) || searchedGenre.Length < 3)
-        {
-            throw new ArgumentException("O gênero buscado deve ter pelo menos 3 caracteres.");
-        }
-
-        var books = _userbookRepository.GetAllBooks(page, _pageSize);
-
-        var filteredBooks = books
-            .Where(b => b.Genres
-                .Any(g => g.Name
-                    .Contains(searchedGenre, StringComparison.OrdinalIgnoreCase)))
-            .Select(b => new BookDTO
-            {
-                Id = b.Id,
-                Title = b.Title,
-                Pages = b.PagesNumber,
-                Synopsis = b.Synopsis,
-                PublishedDate = b.PublishingYear,
-                AuthorName = b.Author.Name,
-                Genres = b.Genres
-                    .Select(g => g.Name)
-                    .ToList()
-            })
-            .ToList();
-
-        return filteredBooks;
-    }
+    
 }

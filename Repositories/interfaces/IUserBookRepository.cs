@@ -9,10 +9,9 @@ public interface IUserbookRepository
     bool BookExists(Guid bookId);
     bool UserHasBook(Guid userId, Guid bookId);
     public Userbook? GetUserbook(Guid userId, Guid bookId);
-    public Book GetBookById(Guid bookId);
     public Userbook? GetUserBookById(Guid userBookId);
     public bool DeleteUserBook(Guid userId, Guid bookId);
     public void UpdateReadPages(Userbook userbook);
     public void AddRating(Userbook userbook);
-    public List<Book> GetAllBooks(int page, int pageSize);
+    
 }

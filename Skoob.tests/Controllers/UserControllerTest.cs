@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Moq;
 using Skoob.Controllers;
 using Skoob.Interfaces;
@@ -37,7 +36,7 @@ public class UserControllerTests
         Assert.That(okResult.StatusCode, Is.EqualTo(200));
 
         var returnValue = okResult.Value as UserResponseDTO;
-        Assert.That(returnValue.UserName, Is.EqualTo("Mayyzena Teste"));
+        Assert.That(returnValue?.UserName, Is.EqualTo("Mayyzena Teste"));
     }
 
     [Test]
