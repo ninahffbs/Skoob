@@ -95,4 +95,53 @@ public class UserBookController : ControllerBase
         var books = _userBookService.GetAllBooks(page);
         return Ok(books);
     }
+
+    [HttpGet("user/{userId}/filter/title")]
+    public IActionResult FilterUserBookByTitle(Guid userId, [FromQuery] string searchedTitle)
+    {
+        try
+        {
+            var result = _userBookService.FilterUserBookByTitle(userId, searchedTitle);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpGet("filter/title")]
+    public IActionResult FilterBookByTitle([FromQuery] string searchedTitle, [FromQuery] int page = 1)
+    {
+        var books = _userBookService.FilterBookByTitle(searchedTitle, page);
+        return Ok(books);
+    }
+
+    [HttpGet("user/{userId}/filter/genre")]
+    public IActionResult FilterUserBookByGenre(Guid userId, [FromQuery] string searchedGenre)
+    {
+        try
+        {
+            var result = _userBookService.FilterUserBookByGenre(userId, searchedGenre);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+    
+    [HttpGet("filter/genre")]
+    public IActionResult FilterBookByGenre([FromQuery] string searchedGenre, [FromQuery] int page = 1)
+    {
+        try
+        {
+            var result = _userBookService.FilterBookByGenre(searchedGenre, page);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }

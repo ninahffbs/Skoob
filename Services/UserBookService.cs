@@ -176,7 +176,7 @@ public class UserbookService : IUserServiceBook
     {
         if (page <= 0)
             page = 1;
-        
+
         var books = _userbookRepository.GetAllBooks(page, _pageSize);
 
         return books.Select(b => new BookDTO
@@ -189,5 +189,120 @@ public class UserbookService : IUserServiceBook
             AuthorName = b.Author?.Name,
             Genres = b.Genres.Select(g => g.Name).ToList()
         }).ToList();
+    }
+    //FilterByTitle
+    public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle)
+    {
+        if (string.IsNullOrWhiteSpace(searchedTitle) || searchedTitle.Length < 3)
+        {
+            throw new ArgumentException("O título deve ter pelo menos 3 caracteres.");
+        }
+        var user = _userRepository.GetById(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Usuário com esse id não foi encontrado.");
+        }
+        var userBooks = _userbookRepository.GetUserbooksByUserId(userId);
+
+        var filteredBooks = userBooks
+            .Where(ub => ub.Book.Title
+                .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
+            .Select(ub => MapToDTO(ub)).ToList();
+
+        return filteredBooks;
+    }
+
+    public List<BookDTO> FilterBookByTitle(string searchedTitle, int page)
+    {
+        if (page <= 0)
+        {
+            page = 1;
+        }
+
+        if (string.IsNullOrWhiteSpace(searchedTitle) || searchedTitle.Length < 3)
+        {
+            throw new ArgumentException("O título deve ter pelo menos 3 caracteres.");
+        }
+
+        var books = _userbookRepository.GetAllBooks(page, _pageSize);
+
+        var filteredBooks = books
+            .Where(b => b.Title
+                .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
+            .Select(b => new BookDTO
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Pages = b.PagesNumber,
+                Synopsis = b.Synopsis,
+                PublishedDate = b.PublishingYear,
+                AuthorName = b.Author.Name,
+                Genres = b.Genres
+                    .Select(g => g.Name)
+                    .ToList()
+            })
+            .ToList();
+
+        return filteredBooks;
+    }
+
+    public List<UserbookResponseDTO> FilterUserBookByGenre(Guid userId, string searchedGenre)
+    {
+        if (string.IsNullOrWhiteSpace(searchedGenre) || searchedGenre.Length < 3)
+        {
+            throw new ArgumentException("O gênero buscado deve ter pelo menos 3 caracteres.");
+        }
+
+        var user = _userRepository.GetById(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Usuário com esse id não foi encontrado.");
+        }
+
+        var userBooks = _userbookRepository.GetUserbooksByUserId(userId);
+
+        var filteredBooks = userBooks
+            .Where(ub => ub.Book.Genres
+                .Any(g => g.Name
+                    .Contains(searchedGenre, StringComparison.OrdinalIgnoreCase)))
+            .Select(ub => MapToDTO(ub))
+            .ToList();
+
+        return filteredBooks;
+    }
+    //FilterBookByGenre
+    public List<BookDTO> FilterBookByGenre(string searchedGenre, int page)
+    {
+        if (page <= 0)
+        {
+            page = 1;
+        }
+
+        if (string.IsNullOrWhiteSpace(searchedGenre) || searchedGenre.Length < 3)
+        {
+            throw new ArgumentException("O gênero buscado deve ter pelo menos 3 caracteres.");
+        }
+
+        var books = _userbookRepository.GetAllBooks(page, _pageSize);
+
+        var filteredBooks = books
+            .Where(b => b.Genres
+                .Any(g => g.Name
+                    .Contains(searchedGenre, StringComparison.OrdinalIgnoreCase)))
+            .Select(b => new BookDTO
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Pages = b.PagesNumber,
+                Synopsis = b.Synopsis,
+                PublishedDate = b.PublishingYear,
+                AuthorName = b.Author.Name,
+                Genres = b.Genres
+                    .Select(g => g.Name)
+                    .ToList()
+            })
+            .ToList();
+
+        return filteredBooks;
     }
 }
