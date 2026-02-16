@@ -35,7 +35,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("profile/{username}")]
-    public ActionResult<UserResponseDTO> GetProfile(string username)
+    public ActionResult<UserProfileDTO> GetProfile(string username)
     {
         var user = _service.GetByUserName(username);
         

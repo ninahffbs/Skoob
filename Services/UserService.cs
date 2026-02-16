@@ -4,6 +4,7 @@ using Skoob.Models;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Skoob.Enums;
 
 namespace Skoob.Services;
 public class UserService : IUserService
@@ -31,7 +32,14 @@ public class UserService : IUserService
             Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
+            TotalBooks = user.Userbooks?.Count ?? 0,
+            BooksRead = user.Userbooks?
+            .Count(ub => ub.Status == StatusBook.Lido) ?? 0,
+            Books = user.Userbooks?
+            .Select(ub => ub.Book.Title)
+            .ToList() ?? new List<string>()
+            
         }).ToList();
     }
 
@@ -51,13 +59,13 @@ public class UserService : IUserService
         };
     }
 
-    public UserResponseDTO? GetByUserName(string userName)
+    public UserProfileDTO? GetByUserName(string userName)
     {
         var user = _userRepository.GetByName(userName);
 
         if (user == null) return null;
 
-        return new UserResponseDTO
+        return new UserProfileDTO
         {
             Id = user.Id,
             UserName = user.UserName,
@@ -65,16 +73,15 @@ public class UserService : IUserService
             CreatedAt = user.CreatedAt,
             TotalBooks = user.Userbooks.Count,
             BooksRead = user.Userbooks.Count(ub => ub.FinishDate != null),
+            
 
             Books = user.Userbooks.Select(ub => new UserBookSimpleDTO
             {
                 BookTitle = ub.Book.Title, 
                 PagesRead = ub.PagesRead ?? 0,
-            
                 PercentComplete = ub.Book.PagesNumber > 0 
                     ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber) 
                     : 0,
-                
                 Status = ub.Status.ToString(), 
                 StartedAt = ub.StartDate 
             }).ToList()

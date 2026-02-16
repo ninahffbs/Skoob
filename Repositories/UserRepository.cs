@@ -16,6 +16,8 @@ public class UserRepository : IUserRepository
     {
         return _context.Mainusers
             .OrderBy(u => u.CreatedAt)
+            .Include(u => u.Userbooks)
+            .ThenInclude(ub => ub.Book)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToList();
