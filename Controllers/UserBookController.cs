@@ -154,7 +154,7 @@ public class UserBookController : ControllerBase
         content.AppendLine($"Gênero favorito: {report.FavoriteGenre}");
         content.AppendLine("======================================");
 
-       System.IO.File.WriteAllText(fullPath, content.ToString());
+        System.IO.File.WriteAllText(fullPath, content.ToString());
 
         return Ok($"Relatório gerado com sucesso em: {fullPath}");
     }

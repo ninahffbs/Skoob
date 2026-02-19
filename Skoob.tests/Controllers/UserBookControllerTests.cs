@@ -372,5 +372,69 @@ public class UserBookControllerTests
             s => s.AddBookUser(It.IsAny<Guid>(), It.IsAny<AddBooksUserDTO>()),
             Times.Never);
     }
+    [Test]
+    public void GenerateAnnualReportFile_WithValidData_ReturnsOkWithSuccessMessage()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var year = 2026;
+        var expectedReport = new AnnualReadingReportDTO
+        {
+            UserName = "Leitor Incrível",
+            MemberSince = "01/01/2024",
+            TimeOnPlatform = "1.000.000 minutos",
+            TotalRead = 12,
+            TotalReading = 2,
+            TotalWantToRead = 5,
+            TotalPagesRead = 3000,
+            EstimatedReadingHours = 50.5,
+            AverageRating = 4.5,
+            FavoriteGenre = "Fantasia"
+        };
+
+        _mockUserBookService
+            .Setup(s => s.GenerateAnnualReport(userId, year))
+            .Returns(expectedReport);
+
+        // Act
+        var result = _controller.GenerateAnnualReportFile(userId, year);
+
+        // Assert
+        Assert.That(result, Is.TypeOf<OkObjectResult>());
+        var okResult = result as OkObjectResult;
+        Assert.That(okResult!.Value!.ToString(), Does.Contain("Relatório gerado com sucesso"));
+        Assert.That(okResult.Value.ToString(), Does.Contain($"AnnualReadingReport_{userId}_{year}.txt"));
+
+        _mockUserBookService.Verify(s => s.GenerateAnnualReport(userId, year), Times.Once);
+    }
     
+    [Test]
+    public void GenerateAnnualReportFile_UserNotFound_ThrowsArgumentException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var year = 2026;
+
+        _mockUserBookService
+            .Setup(s => s.GenerateAnnualReport(userId, year))
+            .Throws(new ArgumentException($"Usuário com ID {userId} não encontrado"));
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => _controller.GenerateAnnualReportFile(userId, year));
+    }
+
+    [Test]
+    public void GenerateAnnualReportFile_WhenServiceThrowsGenericException_ThrowsException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var year = 2026;
+
+        _mockUserBookService
+            .Setup(s => s.GenerateAnnualReport(userId, year))
+            .Throws(new Exception("Erro inesperado"));
+
+        // Act & Assert
+        Assert.Throws<Exception>(() => _controller.GenerateAnnualReportFile(userId, year));
+    }
 }

@@ -472,5 +472,103 @@ namespace Skoob.Tests
             Assert.That(ex.Message,
                 Is.EqualTo("Usuário com esse id não foi encontrado."));
         }
+        [Test]
+        public void GenerateAnnualReport_UserNotFound_ShouldThrowException()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            _userRepositoryMock.Setup(x => x.GetById(userId)).Returns((Mainuser?)null);
+
+            // Act & Assert
+            var ex = Assert.Throws<ArgumentException>(() => _service.GenerateAnnualReport(userId, 2026));
+            Assert.That(ex.Message, Does.Contain("não encontrado"));
+        }
+
+        [Test]
+        public void GenerateAnnualReport_WithValidData_ShouldCalculateCorrectStatistics()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var year = 2026;
+            var user = new Mainuser
+            {
+                Id = userId,
+                UserName = "DevUser",
+                CreatedAt = DateTime.UtcNow.AddDays(-1) // 1 dia atrás = 1440 minutos
+            };
+
+            var genreFantasy = new Genre { Name = "Fantasia" };
+            var genreSciFi = new Genre { Name = "Ficção" };
+
+            var books = new List<Userbook>
+            {
+                // Livro Lido este ano (deve contar em tudo)
+                new Userbook {
+                    Status = StatusBook.Lido,
+                    FinishDate = new DateTime(year, 5, 10),
+                    Rating = 5,
+                    Book = new Book { PagesNumber = 100, Genres = new List<Genre> { genreFantasy } }
+                },
+                // Livro sendo lido (deve contar apenas páginas lidas e horas)
+                new Userbook {
+                    Status = StatusBook.Lendo,
+                    PagesRead = 50,
+                    Book = new Book { PagesNumber = 200, Genres = new List<Genre> { genreSciFi } }
+                },
+                // Livro 'Quero Ler' (deve contar apenas no total da lista)
+                new Userbook {
+                    Status = StatusBook.QueroLer,
+                    Book = new Book { PagesNumber = 300 }
+                }
+            };
+
+            _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(user);
+            _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(books);
+
+            // Act
+            var report = _service.GenerateAnnualReport(userId, year);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(report.UserName, Is.EqualTo("DevUser"));
+                Assert.That(report.TotalRead, Is.EqualTo(1));
+                Assert.That(report.TotalReading, Is.EqualTo(1));
+                Assert.That(report.TotalWantToRead, Is.EqualTo(1));
+
+                // Páginas: 100 (lido) + 50 (lendo) = 150
+                Assert.That(report.TotalPagesRead, Is.EqualTo(150));
+
+                // Horas: 150 / 60 = 2.5
+                Assert.That(report.EstimatedReadingHours, Is.EqualTo(2.5));
+
+                Assert.That(report.AverageRating, Is.EqualTo(5.0));
+                Assert.That(report.FavoriteGenre, Is.EqualTo("Fantasia"));
+
+                // Tempo na plataforma (deve conter "1.440 minutos" aproximadamente)
+                Assert.That(report.TimeOnPlatform, Does.Contain("minutos"));
+                Assert.That(report.MemberSince, Is.EqualTo(user.CreatedAt.Value.ToString("dd/MM/yyyy")));
+            });
+        }
+
+        [Test]
+        public void GenerateAnnualReport_NoReadBooks_ShouldReturnZeroAverageRating()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var user = new Mainuser { Id = userId, CreatedAt = DateTime.UtcNow };
+
+            // Lista vazia de livros
+            _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(user);
+            _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(new List<Userbook>());
+
+            // Act
+            var report = _service.GenerateAnnualReport(userId, 2026);
+
+            // Assert
+            Assert.That(report.AverageRating, Is.EqualTo(0));
+            Assert.That(report.FavoriteGenre, Is.Null);
+            Assert.That(report.TotalPagesRead, Is.EqualTo(0));
+        }
     }
 }
