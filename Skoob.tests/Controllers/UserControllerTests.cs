@@ -93,7 +93,7 @@ public class UserControllerTests
     public void GetProfile_UserExists_ReturnsOk()
     {
         var username = "user123";
-        var user = new UserResponseDTO { UserName = username };
+        var user = new UserProfileDTO { UserName = username };
 
         _mockService.Setup(s => s.GetByUserName(username)).Returns(user);
 
@@ -110,7 +110,7 @@ public class UserControllerTests
     {
         var username = "user123";
 
-        _mockService.Setup(s => s.GetByUserName(username)).Returns((UserResponseDTO)null);
+        _mockService.Setup(s => s.GetByUserName(username)).Returns((UserProfileDTO)null);
 
         var result = _controller.GetProfile(username);
 

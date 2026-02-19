@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>disable</Nullable>
+    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Skoob.Tests\**" />
-    <EmbeddedResource Remove="Skoob.Tests\**" />
-    <None Remove="Skoob.Tests\**" />
+    <Compile Remove="Skoob.tests\**" />
+    <EmbeddedResource Remove="Skoob.tests\**" />
+    <None Remove="Skoob.tests\**" />
   </ItemGroup>
 
   
