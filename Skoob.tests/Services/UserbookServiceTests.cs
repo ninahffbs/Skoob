@@ -706,7 +706,5 @@ public class UserbookServiceTests
         // Assert
         Assert.That(userBook.Review, Is.Null, "O sistema não permitiu limpar a resenha existente.");
         _userbookRepositoryMock.Verify(x => x.Update(userBook), Times.Once);
-    }
+    }  
 }
-
-    

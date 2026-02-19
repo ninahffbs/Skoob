@@ -189,7 +189,7 @@ public class UserbookService : IUserServiceBook
         userBook.Rating = (short)rating;
         _userbookRepository.Update(userBook);
     }
- 
+
     //FilterByTitle
     public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle)
     {
@@ -237,6 +237,96 @@ public class UserbookService : IUserServiceBook
         return filteredBooks;
     }
 
+    public AnnualReadingReportDTO GenerateAnnualReport(Guid userId, int year)
+    {
+        var user = _userRepository.GetById(userId);
+
+        if (user == null)
+        {
+            throw new ArgumentException($"Usuário com ID {userId} não encontrado");   
+        }
+
+        string memberSince = "Data não disponível";
+        string timeOnPlatform = "0 minutos";
+
+        if (user.CreatedAt.HasValue)
+        {
+            memberSince = user.CreatedAt.Value.ToString("dd/MM/yyyy");
+
+            var diff = DateTime.UtcNow - user.CreatedAt.Value.ToUniversalTime();
+
+            //long arredonda pra baixo
+            long minutes = (long)diff.TotalMinutes;
+
+            timeOnPlatform = $"{minutes:N0} minutos";
+        }
+
+        var userBooks = _userbookRepository.GetUserbooksByUserId(userId);
+
+        //livros finalizados no ano
+        var finishedThisYear = userBooks
+            .Where(ub =>
+                ub.Status == StatusBook.Lido &&
+                ub.FinishDate.HasValue &&
+                ub.FinishDate.Value.Year == year)
+            .ToList();
+
+        //livros atualmente lendo
+        var currentlyReading = userBooks
+            .Where(ub => ub.Status == StatusBook.Lendo)
+            .ToList();
+
+        //livros atualmente quero ler
+        var wantToRead = userBooks
+            .Where(ub => ub.Status == StatusBook.QueroLer)
+            .ToList();
+
+        //Total de paginas lidas: se finalizado, usa total do livro
+        //se lendo, usa PagesRead
+        int pagesFromFinished = finishedThisYear
+            .Sum(ub => ub.Book.PagesNumber);
+
+        int pagesFromReading = currentlyReading
+            .Sum(ub => ub.PagesRead ?? 0);
+
+        int totalPages = pagesFromFinished + pagesFromReading;
+
+        //estimativa -> (1 página = 1 minuto)
+        double totalHours = totalPages / 60.0;
+
+        //média das avaliações de livros finalizados no ano
+        var ratedBooks = finishedThisYear
+            .Where(ub => ub.Rating.HasValue)
+            .ToList();
+
+        double averageRating = ratedBooks.Any()
+            ? ratedBooks.Average(ub => ub.Rating!.Value)
+            : 0;
+
+        //gênero favorito do ano
+        var favoriteGenre = finishedThisYear
+            .SelectMany(ub => ub.Book.Genres)
+            .GroupBy(g => g.Name)
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .FirstOrDefault();
+
+        return new AnnualReadingReportDTO
+        {
+            UserName = user.UserName,
+            Year = year,
+            TotalRead = finishedThisYear.Count,
+            TotalReading = currentlyReading.Count,
+            TotalWantToRead = wantToRead.Count,
+            TotalPagesRead = totalPages,
+            EstimatedReadingHours = Math.Round(totalHours, 2),
+            AverageRating = Math.Round(averageRating, 2),
+            FavoriteGenre = favoriteGenre,
+            MemberSince = memberSince,
+            TimeOnPlatform = timeOnPlatform
+        };
+    }
+    
     public List<UserbookResponseDTO> FilterUserBookByAuthor(Guid userId, string searchedAuthor)
     {
         if (string.IsNullOrWhiteSpace(searchedAuthor) || searchedAuthor.Length < 3)

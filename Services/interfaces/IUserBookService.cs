@@ -14,5 +14,6 @@ public interface IUserServiceBook
     public void UpdateReview(Guid userId, Guid bookId, string? reviewText);
     public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle);
     public List<UserbookResponseDTO> FilterUserBookByGenre(Guid userId, string searchedGenre);
+    public AnnualReadingReportDTO GenerateAnnualReport(Guid userId, int year);
     public List<UserbookResponseDTO> FilterUserBookByAuthor(Guid userId, string searchedAuthor);
 } 
