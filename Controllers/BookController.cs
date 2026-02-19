@@ -17,7 +17,7 @@ public class BookController : ControllerBase
     }
 
     [HttpGet("books")]
-    public ActionResult<List<BookDTO>> GetAllBooks([FromQuery] int page = 1)
+    public ActionResult<List<BookDTO>> ListAllBooks([FromQuery] int page = 1)
     {
         var books = _BookService.GetAllBooks(page);
         return Ok(books);
@@ -30,13 +30,27 @@ public class BookController : ControllerBase
         return Ok(books);
     }
 
-     [HttpGet("filter/genre")]
+    [HttpGet("filter/genre")]
     public IActionResult FilterBookByGenre([FromQuery] string searchedGenre, [FromQuery] int page = 1)
     {
         try
         {
             var result = _BookService.FilterBookByGenre(searchedGenre, page);
             return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpGet("filter/author")]
+    public IActionResult FilterBookByAuthor([FromQuery] string searchedAuthor, [FromQuery] int page = 1)
+    {
+        try
+        {
+            var resultAuthor = _BookService.FilterBookByGenre(searchedAuthor, page);
+            return Ok(resultAuthor);
         }
         catch (ArgumentException ex)
         {

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using Skoob.DTOs;
 using Skoob.Enums;
 using Skoob.Interfaces;
@@ -39,7 +40,7 @@ public class UserbookService : IUserServiceBook
         }
         else
         {
-            startDate = startDate ?? DateTime.UtcNow;
+            startDate ??= DateTime.UtcNow;
         }
 
         // regra 1 usuario existe?
@@ -52,6 +53,11 @@ public class UserbookService : IUserServiceBook
         if (_userbookRepository.UserHasBook(userId, dto.BookId)) throw new ArgumentException("Você já tem esse livro adicionado."); ;
 
         var book = _bookRepository.GetBookById(dto.BookId);
+
+        if(dto.Status == StatusBook.Lido)
+        {
+            dto.PagesRead = book.PagesNumber;
+        }
 
         if (dto.PagesRead > book.PagesNumber)
         {
@@ -222,5 +228,40 @@ public class UserbookService : IUserServiceBook
 
         return filteredBooks;
     }
-    
+
+    public void UpdateStatus(Guid userId, Guid bookId, StatusBook newStatus)
+    {
+        var userBook = _userbookRepository.GetUserbook(userId, bookId) ?? throw new ArgumentException("Livro não encontrado na biblioteca deste usuário.");
+
+        if (!Enum.IsDefined(newStatus))
+        {
+            throw new ArgumentException($"O valor {(int)newStatus} não é um status válido para um livro.");
+        }
+
+        var book = _bookRepository.GetBookById(bookId);
+        
+        switch (newStatus)
+        {
+            case StatusBook.Lido:
+                userBook.FinishDate = DateTime.UtcNow;
+                if (userBook.StartDate == null) userBook.StartDate = DateTime.UtcNow;
+                userBook.PagesRead = book.PagesNumber;
+                break;
+
+            case StatusBook.Lendo:
+                userBook.FinishDate = null; 
+                if (userBook.StartDate == null) userBook.StartDate = DateTime.UtcNow;
+                break;
+
+            case StatusBook.QueroLer:
+                userBook.StartDate = null;
+                userBook.FinishDate = null;
+                userBook.PagesRead = 0;
+                break;
+        }
+
+        userBook.Status = newStatus;
+        _userbookRepository.UpdateStatus(userBook);
+    }
+
 }

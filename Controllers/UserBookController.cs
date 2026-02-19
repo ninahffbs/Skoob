@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Skoob.DTOs;
+using Skoob.Enums;
 using Skoob.Interfaces;
 
 namespace Skoob.Controllers;
@@ -109,6 +110,22 @@ public class UserBookController : ControllerBase
         {
             var result = _userBookService.FilterUserBookByGenre(userId, searchedGenre);
             return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPatch("user/{userId}/book/{bookId}/status")]
+    public IActionResult ChangeStatus(Guid userId, Guid bookId, [FromBody] UpdateStatusDTO dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
+        {
+            _userBookService.UpdateStatus(userId, bookId, dto.Status);
+            return Ok(new { message = "Status atualizado com sucesso!" });
         }
         catch (ArgumentException ex)
         {

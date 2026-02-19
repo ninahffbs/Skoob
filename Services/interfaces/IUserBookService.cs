@@ -1,4 +1,5 @@
 using Skoob.DTOs;
+using Skoob.Enums;
 
 namespace Skoob.Interfaces;
 
@@ -11,4 +12,5 @@ public interface IUserServiceBook
     public void AddRating(Guid userId, Guid bookId, int rating);
     public List<UserbookResponseDTO> FilterUserBookByTitle(Guid userId, string searchedTitle);
     public List<UserbookResponseDTO> FilterUserBookByGenre(Guid userId, string searchedGenre);
+    public void UpdateStatus(Guid userId, Guid bookId, StatusBook newStatus);
 } 

@@ -106,4 +106,33 @@ public class BookService : IBookService {
 
         return filteredBooks;
     }
+
+    public List<BookDTO> FilterBookByAuthor(string searchedAuthor, int page)
+    {
+        if (page <= 0) page = 1;
+
+        if (string.IsNullOrWhiteSpace(searchedAuthor) || searchedAuthor.Length < 3)
+        {
+            throw new ArgumentException("O nome do autor deve ter pelo menos 3 caracteres.");
+        }
+
+        var books = _bookRepository.GetAllBooks(page, _pageSize);
+
+        var filteredBooks = books
+            .Where(b => b.Title
+            .Contains(searchedAuthor, StringComparison.OrdinalIgnoreCase))
+            .Select(b => new BookDTO
+            {   
+                Id = b.Id,
+                Title = b.Title,
+                Pages = b.PagesNumber,
+                Synopsis = b.Synopsis,
+                PublishedDate = b.PublishingYear,
+                AuthorName = b.Author.Name,
+                Genres = [.. b.Genres.Select(g => g.Name)]
+            })
+            .ToList();
+
+        return filteredBooks;
+    }
 }

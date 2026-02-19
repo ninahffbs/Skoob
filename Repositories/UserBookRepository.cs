@@ -71,5 +71,10 @@ public class UserbookRepository : IUserbookRepository
         _context.SaveChanges();
     }
 
+    public void UpdateStatus(Userbook userbook)
+    {
+        _context.Userbooks.Update(userbook);
+        _context.SaveChanges();
+    }
     
 }
