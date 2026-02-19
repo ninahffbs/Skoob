@@ -96,7 +96,7 @@ public class UserbookService : IUserServiceBook
         return userbooks.Select(ub => MapToDTO(ub)).ToList();
     }
 
-    private UserbookResponseDTO MapToDTO(Userbook ub)
+    private static UserbookResponseDTO MapToDTO(Userbook ub)
     {
         return new UserbookResponseDTO
         {
@@ -119,7 +119,7 @@ public class UserbookService : IUserServiceBook
         };
     }
 
-    private string GetStatusName(StatusBook status)
+    private static string GetStatusName(StatusBook status)
     {
         return status switch
         {
@@ -206,7 +206,7 @@ public class UserbookService : IUserServiceBook
 
         var filteredBooks = userBooks
             .Where(ub => ub.Book.Title
-                .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
+            .Contains(searchedTitle, StringComparison.OrdinalIgnoreCase))
             .Select(ub => MapToDTO(ub)).ToList();
 
         return filteredBooks;
@@ -219,12 +219,7 @@ public class UserbookService : IUserServiceBook
             throw new ArgumentException("O gênero buscado deve ter pelo menos 3 caracteres.");
         }
 
-        var user = _userRepository.GetById(userId);
-        if (user == null)
-        {
-            throw new ArgumentException("Usuário com esse id não foi encontrado.");
-        }
-
+        var user = _userRepository.GetById(userId) ?? throw new ArgumentException("Usuário com esse id não foi encontrado.");
         var userBooks = _userbookRepository.GetUserbooksByUserId(userId);
 
         var filteredBooks = userBooks
