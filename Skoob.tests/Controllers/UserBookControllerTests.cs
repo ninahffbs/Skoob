@@ -372,6 +372,158 @@ public class UserBookControllerTests
             s => s.AddBookUser(It.IsAny<Guid>(), It.IsAny<AddBooksUserDTO>()),
             Times.Never);
     }
+
+    [Test]
+    public void FilterUserBookByAuthor_ShouldReturnOk_WhenServiceReturnsData()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var author = "Tolkien";
+        var mockResult = new List<UserbookResponseDTO> 
+        { 
+            new UserbookResponseDTO { BookTitle = "Senhor dos Anéis", AuthorName = "J.R.R. Tolkien" } 
+        };
+
+        _mockUserBookService.Setup(s => s.FilterUserBookByAuthor(userId, author))
+                            .Returns(mockResult);
+
+        // Act
+        var result = _controller.FilterUserBookByAuthor(userId, author);
+
+        // Assert
+        var okResult = result as OkObjectResult;
+        Assert.That(okResult, Is.Not.Null);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(okResult.StatusCode, Is.EqualTo(200));
+            Assert.That(okResult.Value, Is.EqualTo(mockResult));
+        }
+
+        _mockUserBookService.Verify(s => s.FilterUserBookByAuthor(userId, author), Times.Once);
+    }
+
+    [Test]
+    public void FilterUserBookByAuthor_ShouldReturnBadRequest_WhenServiceThrowsArgumentException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var invalidAuthor = "Jo"; 
+        var expectedError = "O autor buscado deve ter pelo menos 3 caracteres.";
+
+        _mockUserBookService.Setup(s => s.FilterUserBookByAuthor(userId, invalidAuthor))
+                            .Throws(new ArgumentException(expectedError));
+
+        // Act
+        var result = _controller.FilterUserBookByAuthor(userId, invalidAuthor);
+
+        // Assert
+        var badRequestResult = result as BadRequestObjectResult;
+        Assert.That(badRequestResult, Is.Not.Null);
+        Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
+        
+        
+        Assert.That(badRequestResult.Value?.ToString(), Does.Contain(expectedError));
+    }
+
+    // ==========================================
+    // TESTES PARA: ChangeStatus
+    // ==========================================
+
+    [Test]
+    public void ChangeStatus_ShouldReturnOk_WhenUpdateIsSuccessful()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var bookId = Guid.NewGuid();
+        var dto = new UpdateStatusDTO { Status = StatusBook.Lido };
+
+        _mockUserBookService.Setup(s => s.UpdateStatus(userId, bookId, dto.Status));
+
+        // Act
+        var result = _controller.ChangeStatus(userId, bookId, dto);
+
+        // Assert
+        var okResult = result as OkObjectResult;
+        Assert.That(okResult, Is.Not.Null);
+        Assert.That(okResult.StatusCode, Is.EqualTo(200));
+        Assert.That(okResult.Value?.ToString(), Does.Contain("Status atualizado com sucesso!"));
+
+        _mockUserBookService.Verify(s => s.UpdateStatus(userId, bookId, dto.Status), Times.Once);
+    }
+
+    [Test]
+    public void ChangeStatus_ShouldReturnBadRequest_WhenModelStateIsInvalid()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var bookId = Guid.NewGuid();
+        var dto = new UpdateStatusDTO(); 
+        
+        _controller.ModelState.AddModelError("Status", "O status é obrigatório");
+
+        // Act
+        var result = _controller.ChangeStatus(userId, bookId, dto);
+
+        // Assert
+        var badRequestResult = result as BadRequestObjectResult;
+        Assert.That(badRequestResult, Is.Not.Null);
+        Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
+        
+        _mockUserBookService.Verify(s => s.UpdateStatus(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<StatusBook>()), Times.Never);
+    }
+
+    [Test]
+    public void ChangeStatus_ShouldReturnBadRequest_WhenServiceThrowsArgumentException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var bookId = Guid.NewGuid();
+        var dto = new UpdateStatusDTO { Status = StatusBook.Lido };
+        var expectedError = "Livro não encontrado na biblioteca deste usuário.";
+
+        _mockUserBookService.Setup(s => s.UpdateStatus(userId, bookId, dto.Status))
+                            .Throws(new ArgumentException(expectedError));
+
+        // Act
+        var result = _controller.ChangeStatus(userId, bookId, dto);
+
+        // Assert
+        var badRequestResult = result as BadRequestObjectResult;
+        Assert.That(badRequestResult, Is.Not.Null);
+        Assert.That(badRequestResult.StatusCode, Is.EqualTo(400));
+        Assert.That(badRequestResult.Value?.ToString(), Does.Contain(expectedError));
+    }
+    
+    [Test]
+    public void GenerateAnnualReportFile_UserNotFound_ThrowsArgumentException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var year = 2026;
+
+        _mockUserBookService
+            .Setup(s => s.GenerateAnnualReport(userId, year))
+            .Throws(new ArgumentException($"Usuário com ID {userId} não encontrado"));
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => _controller.GenerateAnnualReportFile(userId, year));
+    }
+
+    [Test]
+    public void GenerateAnnualReportFile_WhenServiceThrowsGenericException_ThrowsException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var year = 2026;
+
+        _mockUserBookService
+            .Setup(s => s.GenerateAnnualReport(userId, year))
+            .Throws(new Exception("Erro inesperado"));
+
+        // Act & Assert
+        Assert.Throws<Exception>(() => _controller.GenerateAnnualReportFile(userId, year));
+    }
+  
     [Test]
     public void GenerateAnnualReportFile_WithValidData_ReturnsOkWithSuccessMessage()
     {
@@ -406,35 +558,5 @@ public class UserBookControllerTests
         Assert.That(okResult.Value.ToString(), Does.Contain($"AnnualReadingReport_{userId}_{year}.txt"));
 
         _mockUserBookService.Verify(s => s.GenerateAnnualReport(userId, year), Times.Once);
-    }
-    
-    [Test]
-    public void GenerateAnnualReportFile_UserNotFound_ThrowsArgumentException()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var year = 2026;
-
-        _mockUserBookService
-            .Setup(s => s.GenerateAnnualReport(userId, year))
-            .Throws(new ArgumentException($"Usuário com ID {userId} não encontrado"));
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => _controller.GenerateAnnualReportFile(userId, year));
-    }
-
-    [Test]
-    public void GenerateAnnualReportFile_WhenServiceThrowsGenericException_ThrowsException()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var year = 2026;
-
-        _mockUserBookService
-            .Setup(s => s.GenerateAnnualReport(userId, year))
-            .Throws(new Exception("Erro inesperado"));
-
-        // Act & Assert
-        Assert.Throws<Exception>(() => _controller.GenerateAnnualReportFile(userId, year));
     }
 }
