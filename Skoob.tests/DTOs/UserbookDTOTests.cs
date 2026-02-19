@@ -242,5 +242,159 @@ namespace Skoob.Tests.DTOs
             Assert.That(dto.StatusName, Is.EqualTo("Lendo"));
             Assert.That(dto.Rating, Is.EqualTo(5));
         }
-    }
+        [Test]
+        public void Validate_UpdateUserbooksDTO_RatingBelowMinimum_ReturnsError()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lido,
+                Rating = 0
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(1));
+            Assert.That(results[0].ErrorMessage,
+                Is.EqualTo("Rating deve ser entre 1 e 5"));
+        }
+
+        [Test]
+        public void Validate_UpdateUserbooksDTO_RatingAtMinimum_IsValid()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lido,
+                Rating = 1
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Validate_UpdateUserbooksDTO_RatingAtMaximum_IsValid()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lido,
+                Rating = 5
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Validate_UpdateUserbooksDTO_PagesReadZero_IsValid()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lendo,
+                PagesRead = 0
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Validate_UpdateUserbooksDTO_ReviewExactly500Characters_IsValid()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lido,
+                Review = new string('a', 500)
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Validate_UpdateUserbooksDTO_OnlyStatusDefault_IsValid()
+        {
+            var dto = new UpdateUserbooksDTO();
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+        [Test]
+        public void Validate_UpdateUserbooksDTO_MultipleErrors_ReturnsAllErrors()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = (StatusBook)10,
+                PagesRead = -5,
+                Rating = 10,
+                Review = new string('a', 600)
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void Validate_UpdateUserbooksDTO_RatingNull_NoError()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lido,
+                Rating = null
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+        [Test]
+        public void Validate_UpdateUserbooksDTO_PagesReadNull_NoError()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lendo,
+                PagesRead = null
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Validate_UpdateUserbooksDTO_ReviewAtLimit_NoError()
+        {
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lido,
+                Review = new string('a', 500)
+            };
+
+            var results = ValidateModel(dto);
+
+            Assert.That(results.Count, Is.EqualTo(0));
+        }
+        [Test]
+        public void Validate_UpdateUserbooksDTO_StartAndFinishDate_Accessed_ShouldBeCovered()
+        {
+            var start = DateTime.Now;
+            var finish = DateTime.Now.AddDays(10);
+
+            var dto = new UpdateUserbooksDTO
+            {
+                Status = StatusBook.Lendo,
+                StartDate = start,
+                FinishDate = finish
+            };
+
+            // Força execução do getter
+            Assert.That(dto.StartDate, Is.EqualTo(start));
+            Assert.That(dto.FinishDate, Is.EqualTo(finish));
+        }
+    }  
 }

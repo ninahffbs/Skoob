@@ -96,9 +96,9 @@ namespace Skoob.Tests
         public void FilterBookByGenre_ShouldThrowException_WhenGenreIsInvalid()
         {
             var invalidGenre = "Fi"; // Less than 3 chars
-            
+
             var ex = Assert.Throws<ArgumentException>(() => _service.FilterBookByGenre(invalidGenre, 1));
-            
+
             Assert.That(ex.Message, Does.Contain("pelo menos 3 caracteres"));
         }
 
@@ -142,10 +142,40 @@ namespace Skoob.Tests
         public void FilterBookByTitle_ShouldThrowException_WhenTitleIsInvalid()
         {
             var invalidTitle = "HP"; // Less than 3 chars
-            
+
             var ex = Assert.Throws<ArgumentException>(() => _service.FilterBookByTitle(invalidTitle, 1));
-            
+
             Assert.That(ex.Message, Does.Contain("pelo menos 3 caracteres"));
+        }
+        
+        [Test]
+        public void FilterBookByTitle_WhenPageIsZero_ShouldSetPageToOne()
+        {
+            var searchedTitle = "har";
+
+            var books = new List<Book>
+            {
+                new Book
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Harry Potter",
+                    PagesNumber = 300,
+                    Synopsis = "Test",
+                    PublishingYear = 2000,
+                    Author = new Author { Name = "J.K Rowling" },
+                    Genres = new List<Genre> { new Genre { Name = "Fantasy" } }
+                }
+            };
+
+            _bookRepositoryMock
+                .Setup(x => x.GetAllBooks(1, It.IsAny<int>()))
+                .Returns(books);
+
+            var result = _service.FilterBookByTitle(searchedTitle, 0);
+
+            Assert.That(result.Count, Is.EqualTo(1));
+
+            _bookRepositoryMock.Verify(x => x.GetAllBooks(1, It.IsAny<int>()), Times.Once);
         }
     }
 }
