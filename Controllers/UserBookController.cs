@@ -122,9 +122,7 @@ public class UserBookController : ControllerBase
     {
         var report = _userBookService.GenerateAnnualReport(userId, year);
 
-        // 📁 Caminho da pasta Reports (na raiz do projeto)
         string reportsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Reports");
-
 
         if (!Directory.Exists(reportsFolder))
         {

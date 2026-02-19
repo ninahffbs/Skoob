@@ -6,7 +6,6 @@ using Skoob.DTOs;
 using Skoob.Models;
 using Skoob.Enums;
 
-
 namespace Skoob.Tests;
 
 [TestFixture]
@@ -197,6 +196,7 @@ public class UserbookServiceTests
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result[0].BookTitle, Is.EqualTo("Book1"));
     }
+
     [Test]
     public void AddBookUser_ShouldThrowException_WhenUserAlreadyHasBook()
     {
@@ -233,6 +233,7 @@ public class UserbookServiceTests
 
         Assert.Throws<ArgumentException>(() => _service.AddBookUser(userId, dto));
     }
+
     [Test]
     public void AddBookUser_WhenPagesReadEqualsTotal_ShouldSetStatusToLido()
     {
@@ -352,6 +353,7 @@ public class UserbookServiceTests
         Assert.Throws<ArgumentException>(() =>
             _service.FilterUserBookByGenre(userId, "a"));
     }
+
     [Test]
     public void AddBookUser_WhenStatusIsQueroLer_ShouldSetStartDateToNull()
     {
@@ -383,34 +385,17 @@ public class UserbookServiceTests
             Book = book
         };
 
-        _userRepositoryMock
-            .Setup(x => x.Exists(userId))
-            .Returns(true);
-
-        _userbookRepositoryMock
-            .Setup(x => x.BookExists(bookId))
-            .Returns(true);
-
-        _userbookRepositoryMock
-            .Setup(x => x.UserHasBook(userId, bookId))
-            .Returns(false);
-
-        _bookRepositoryMock
-            .Setup(x => x.GetBookById(bookId))
-            .Returns(book);
-
-        _userbookRepositoryMock
-            .Setup(x => x.AddBookToUser(It.IsAny<Userbook>()));
-
-        _userbookRepositoryMock
-            .Setup(x => x.GetUserbook(userId, bookId))
-            .Returns(createdUserBook);
+        _userRepositoryMock.Setup(x => x.Exists(userId)).Returns(true);
+        _userbookRepositoryMock.Setup(x => x.BookExists(bookId)).Returns(true);
+        _userbookRepositoryMock.Setup(x => x.UserHasBook(userId, bookId)).Returns(false);
+        _bookRepositoryMock.Setup(x => x.GetBookById(bookId)).Returns(book);
+        _userbookRepositoryMock.Setup(x => x.AddBookToUser(It.IsAny<Userbook>()));
+        _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(createdUserBook);
 
         var result = _service.AddBookUser(userId, dto);
 
         Assert.That(result.StartDate, Is.Null);
     }
-
 
     [Test]
     public void UpdateReadPages_WhenPagesGreaterThanTotal_ShouldThrowException()
@@ -431,31 +416,26 @@ public class UserbookServiceTests
             Book = book
         };
 
-        _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId))
-            .Returns(userBook);
-
-        _bookRepositoryMock.Setup(x => x.GetBookById(bookId))
-            .Returns(book);
+        _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
+        _bookRepositoryMock.Setup(x => x.GetBookById(bookId)).Returns(book);
 
         var ex = Assert.Throws<ArgumentException>(() =>
             _service.UpdateReadPages(userId, bookId, 250));
 
-        Assert.That(ex.Message,
-            Is.EqualTo($"Este livro possui apenas {book.PagesNumber} páginas"));
+        Assert.That(ex.Message, Is.EqualTo($"Este livro possui apenas {book.PagesNumber} páginas"));
     }
+
     [Test]
     public void FilterUserBookByTitle_WhenUserNotFound_ShouldThrowException()
     {
         var userId = Guid.NewGuid();
 
-        _userRepositoryMock.Setup(x => x.GetById(userId))
-            .Returns((Mainuser?)null);
+        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns((Mainuser?)null);
 
         var ex = Assert.Throws<ArgumentException>(() =>
             _service.FilterUserBookByTitle(userId, "harry"));
 
-        Assert.That(ex.Message,
-            Is.EqualTo("Usuário com esse id não foi encontrado."));
+        Assert.That(ex.Message, Is.EqualTo("Usuário com esse id não foi encontrado."));
     }
 
     [Test]
@@ -463,14 +443,12 @@ public class UserbookServiceTests
     {
         var userId = Guid.NewGuid();
 
-        _userRepositoryMock.Setup(x => x.GetById(userId))
-            .Returns((Mainuser?)null);
+        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns((Mainuser?)null);
 
         var ex = Assert.Throws<ArgumentException>(() =>
             _service.FilterUserBookByGenre(userId, "fantasy"));
 
-        Assert.That(ex.Message,
-            Is.EqualTo("Usuário com esse id não foi encontrado."));
+        Assert.That(ex.Message, Is.EqualTo("Usuário com esse id não foi encontrado."));
     }
 
     [Test]
@@ -518,7 +496,7 @@ public class UserbookServiceTests
         var result = _service.FilterUserBookByAuthor(userId, searchAuthor);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result.Count, Is.EqualTo(1), "Deveria ter filtrado apenas 1 livro.");
+        Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result[0].AuthorName, Is.EqualTo("J.R.R. Tolkien"));
     }
 
@@ -543,7 +521,7 @@ public class UserbookServiceTests
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
 
-        var invalidStatus = (StatusBook)999; 
+        var invalidStatus = (StatusBook)999;
 
         var ex = Assert.Throws<ArgumentException>(() => _service.UpdateStatus(userId, bookId, invalidStatus));
         Assert.That(ex.Message, Does.Contain("não é um status válido para um livro"));
@@ -555,13 +533,13 @@ public class UserbookServiceTests
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
         var book = new Book { Id = bookId, PagesNumber = 500 };
-        var userBook = new Userbook 
-        { 
-            UserId = userId, 
-            BookId = bookId, 
+        var userBook = new Userbook
+        {
+            UserId = userId,
+            BookId = bookId,
             PagesRead = 100,
-            StartDate = null, 
-            FinishDate = null 
+            StartDate = null,
+            FinishDate = null
         };
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
@@ -571,23 +549,24 @@ public class UserbookServiceTests
 
         Assert.That(userBook.Status, Is.EqualTo(StatusBook.Lido));
         Assert.That(userBook.FinishDate, Is.Not.Null);
-        Assert.That(userBook.StartDate, Is.Not.Null, "Deveria ter setado a data de início também, já que estava nula.");
-        Assert.That(userBook.PagesRead, Is.EqualTo(500), "Deveria ter atualizado as páginas lidas para o total do livro.");
-        
+        Assert.That(userBook.StartDate, Is.Not.Null);
+        Assert.That(userBook.PagesRead, Is.EqualTo(500));
+
         _userbookRepositoryMock.Verify(x => x.Update(userBook), Times.Once);
     }
 
+    [Test]
     public void UpdateStatus_ShouldUpdateToLendo_AndClearFinishDate()
     {
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
         var book = new Book { Id = bookId, PagesNumber = 500 };
-        var userBook = new Userbook 
-        { 
-            UserId = userId, 
-            BookId = bookId, 
-            Status = StatusBook.Lido, // Simula que estava Lido
-            FinishDate = DateTime.UtcNow.AddDays(-1), // Tinha data de fim
+        var userBook = new Userbook
+        {
+            UserId = userId,
+            BookId = bookId,
+            Status = StatusBook.Lido,
+            FinishDate = DateTime.UtcNow.AddDays(-1),
             StartDate = DateTime.UtcNow.AddDays(-5)
         };
 
@@ -599,8 +578,8 @@ public class UserbookServiceTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(userBook.Status, Is.EqualTo(StatusBook.Lendo));
-            Assert.That(userBook.FinishDate, Is.Null, "Deveria ter limpado a data de término ao voltar para 'Lendo'.");
-            Assert.That(userBook.StartDate, Is.Not.Null, "Não deveria ter apagado a data de início que já existia.");
+            Assert.That(userBook.FinishDate, Is.Null);
+            Assert.That(userBook.StartDate, Is.Not.Null);
         }
 
         _userbookRepositoryMock.Verify(x => x.Update(userBook), Times.Once);
@@ -612,14 +591,14 @@ public class UserbookServiceTests
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
         var book = new Book { Id = bookId, PagesNumber = 500 };
-        var userBook = new Userbook 
-        { 
-            UserId = userId, 
-            BookId = bookId, 
+        var userBook = new Userbook
+        {
+            UserId = userId,
+            BookId = bookId,
             Status = StatusBook.Lendo,
             PagesRead = 250,
             StartDate = DateTime.UtcNow,
-            FinishDate = DateTime.UtcNow 
+            FinishDate = DateTime.UtcNow
         };
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
@@ -630,9 +609,9 @@ public class UserbookServiceTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(userBook.Status, Is.EqualTo(StatusBook.QueroLer));
-            Assert.That(userBook.StartDate, Is.Null, "Status 'Quero Ler' não pode ter data de início.");
-            Assert.That(userBook.FinishDate, Is.Null, "Status 'Quero Ler' não pode ter data de fim.");
-            Assert.That(userBook.PagesRead, Is.EqualTo(0), "Deveria ter zerado as páginas lidas.");
+            Assert.That(userBook.StartDate, Is.Null);
+            Assert.That(userBook.FinishDate, Is.Null);
+            Assert.That(userBook.PagesRead, Is.EqualTo(0));
         }
 
         _userbookRepositoryMock.Verify(x => x.Update(userBook), Times.Once);
@@ -641,15 +620,13 @@ public class UserbookServiceTests
     [Test]
     public void UpdateReview_ShouldThrowArgumentException_WhenUserBookNotFound()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns((Userbook)null);
 
-        // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => _service.UpdateReview(userId, bookId, "Ótimo livro"));
-        
+
         Assert.That(ex.Message, Does.Contain("Livro não encontrado"));
         _userbookRepositoryMock.Verify(x => x.Update(It.IsAny<Userbook>()), Times.Never);
     }
@@ -657,16 +634,14 @@ public class UserbookServiceTests
     [Test]
     public void UpdateReview_ShouldThrowInvalidOperationException_WhenStatusIsQueroLer()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
         var userBook = new Userbook { UserId = userId, BookId = bookId, Status = StatusBook.Lendo };
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
 
-        // Act & Assert
         var ex = Assert.Throws<InvalidOperationException>(() => _service.UpdateReview(userId, bookId, "Tentando avaliar antes de ler"));
-        
+
         Assert.That(ex.Message, Does.Contain("não pode avaliar um livro que ainda não começou a ler"));
         _userbookRepositoryMock.Verify(x => x.Update(It.IsAny<Userbook>()), Times.Never);
     }
@@ -674,37 +649,111 @@ public class UserbookServiceTests
     [Test]
     public void UpdateReview_ShouldUpdateSuccessfully_AndTrimText_WhenStatusIsValid()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
-        var userBook = new Userbook { UserId = userId, BookId = bookId, Status = StatusBook.Lido }; 
-        var untrimmedReview = "   Obra prima da ficção!   "; 
+        var userBook = new Userbook { UserId = userId, BookId = bookId, Status = StatusBook.Lido };
+        var untrimmedReview = "   Obra prima da ficção!   ";
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
 
-        // Act
         _service.UpdateReview(userId, bookId, untrimmedReview);
 
-        // Assert
-        Assert.That(userBook.Review, Is.EqualTo("Obra prima da ficção!"), "O serviço deveria ter aplicado Trim() para limpar a sujeira da string.");
+        Assert.That(userBook.Review, Is.EqualTo("Obra prima da ficção!"));
         _userbookRepositoryMock.Verify(x => x.Update(userBook), Times.Once);
     }
 
     [Test]
     public void UpdateReview_ShouldAllowNullReview_ToClearExistingReview()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
         var userBook = new Userbook { UserId = userId, BookId = bookId, Status = StatusBook.Lido, Review = "Achei o final ruim." };
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
 
-        // Act
         _service.UpdateReview(userId, bookId, null);
 
-        // Assert
-        Assert.That(userBook.Review, Is.Null, "O sistema não permitiu limpar a resenha existente.");
+        Assert.That(userBook.Review, Is.Null);
         _userbookRepositoryMock.Verify(x => x.Update(userBook), Times.Once);
-    }  
+    }
+
+    [Test]
+    public void GenerateAnnualReport_UserNotFound_ShouldThrowException()
+    {
+        var userId = Guid.NewGuid();
+        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns((Mainuser?)null);
+
+        var ex = Assert.Throws<ArgumentException>(() => _service.GenerateAnnualReport(userId, 2026));
+        Assert.That(ex.Message, Does.Contain("não encontrado"));
+    }
+
+    [Test]
+    public void GenerateAnnualReport_WithValidData_ShouldCalculateCorrectStatistics()
+    {
+        var userId = Guid.NewGuid();
+        var year = 2026;
+        var user = new Mainuser
+        {
+            Id = userId,
+            UserName = "DevUser",
+            CreatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+
+        var genreFantasy = new Genre { Name = "Fantasia" };
+        var genreSciFi = new Genre { Name = "Ficção" };
+
+        var books = new List<Userbook>
+        {
+            new Userbook {
+                Status = StatusBook.Lido,
+                FinishDate = new DateTime(year, 5, 10),
+                Rating = 5,
+                Book = new Book { PagesNumber = 100, Genres = new List<Genre> { genreFantasy } }
+            },
+            new Userbook {
+                Status = StatusBook.Lendo,
+                PagesRead = 50,
+                Book = new Book { PagesNumber = 200, Genres = new List<Genre> { genreSciFi } }
+            },
+            new Userbook {
+                Status = StatusBook.QueroLer,
+                Book = new Book { PagesNumber = 300 }
+            }
+        };
+
+        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(user);
+        _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(books);
+
+        var report = _service.GenerateAnnualReport(userId, year);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(report.UserName, Is.EqualTo("DevUser"));
+            Assert.That(report.TotalRead, Is.EqualTo(1));
+            Assert.That(report.TotalReading, Is.EqualTo(1));
+            Assert.That(report.TotalWantToRead, Is.EqualTo(1));
+            Assert.That(report.TotalPagesRead, Is.EqualTo(150));
+            Assert.That(report.EstimatedReadingHours, Is.EqualTo(2.5));
+            Assert.That(report.AverageRating, Is.EqualTo(5.0));
+            Assert.That(report.FavoriteGenre, Is.EqualTo("Fantasia"));
+            Assert.That(report.TimeOnPlatform, Does.Contain("minutos"));
+            Assert.That(report.MemberSince, Is.EqualTo(user.CreatedAt.Value.ToString("dd/MM/yyyy")));
+        });
+    }
+
+    [Test]
+    public void GenerateAnnualReport_NoReadBooks_ShouldReturnZeroAverageRating()
+    {
+        var userId = Guid.NewGuid();
+        var user = new Mainuser { Id = userId, CreatedAt = DateTime.UtcNow };
+
+        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(user);
+        _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(new List<Userbook>());
+
+        var report = _service.GenerateAnnualReport(userId, 2026);
+
+        Assert.That(report.AverageRating, Is.EqualTo(0));
+        Assert.That(report.FavoriteGenre, Is.Null);
+        Assert.That(report.TotalPagesRead, Is.EqualTo(0));
+    }
 }
