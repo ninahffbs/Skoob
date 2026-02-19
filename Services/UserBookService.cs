@@ -139,6 +139,8 @@ public class UserbookService : IUserServiceBook
 
     public void UpdateReadPages(Guid userId, Guid bookId, int newPages)
     {
+
+        
         if (newPages < 0)
         {
             throw new ArgumentException("O número de páginas não pode ser negativo");
@@ -146,10 +148,16 @@ public class UserbookService : IUserServiceBook
         var userBook = _userbookRepository.GetUserbook(userId, bookId);
         var book = _bookRepository.GetBookById(bookId);
 
+        if (userBook == null)
+        {
+            throw new ArgumentException("Livro não encontrado na biblioteca deste usuário.");
+        }
+
         if (newPages > book.PagesNumber)
         {
             throw new ArgumentException($"Este livro possui apenas {book.PagesNumber} páginas");
         }
+        
         userBook.PagesRead = newPages;
 
         if (newPages == book.PagesNumber)
@@ -161,7 +169,7 @@ public class UserbookService : IUserServiceBook
         {
             userBook.Status = StatusBook.Lendo;
         }
-        _userbookRepository.UpdateReadPages(userBook);
+        _userbookRepository.Update(userBook);
     }
 
     public void AddRating(Guid userId, Guid bookId, int rating)
@@ -173,13 +181,13 @@ public class UserbookService : IUserServiceBook
 
         var userBook = _userbookRepository.GetUserbook(userId, bookId);
 
-        if (userBook.Status != StatusBook.Lido)
+        if (userBook?.Status != StatusBook.Lido)
         {
             throw new ArgumentException("Você não pode avaliar um livro que ainda não finalizou");
         }
 
         userBook.Rating = (short)rating;
-        _userbookRepository.AddRating(userBook);
+        _userbookRepository.Update(userBook);
     }
  
     //FilterByTitle
@@ -229,6 +237,24 @@ public class UserbookService : IUserServiceBook
         return filteredBooks;
     }
 
+    public List<UserbookResponseDTO> FilterUserBookByAuthor(Guid userId, string searchedAuthor)
+    {
+        if (string.IsNullOrWhiteSpace(searchedAuthor) || searchedAuthor.Length < 3)
+        {
+            throw new ArgumentException("O autor buscado deve ter pelo menos 3 caracteres.");
+        }
+
+        var user = _userRepository.GetById(userId) ?? throw new ArgumentException("Usuário com este id não foi encontrado.");
+        var userBooks = _userbookRepository.GetUserbooksByUserId(userId);
+
+        var filteredBooks = userBooks
+        .Where(ub => ub.Book.Author != null && ub.Book.Author.Name.Contains(searchedAuthor, StringComparison.OrdinalIgnoreCase))
+        .Select(ub => MapToDTO(ub))
+        .ToList();
+
+        return filteredBooks;
+    }
+
     public void UpdateStatus(Guid userId, Guid bookId, StatusBook newStatus)
     {
         var userBook = _userbookRepository.GetUserbook(userId, bookId) ?? throw new ArgumentException("Livro não encontrado na biblioteca deste usuário.");
@@ -261,7 +287,19 @@ public class UserbookService : IUserServiceBook
         }
 
         userBook.Status = newStatus;
-        _userbookRepository.UpdateStatus(userBook);
+        _userbookRepository.Update(userBook);
     }
 
+    public void UpdateReview(Guid userId, Guid bookId, string? reviewText)
+    {
+        var userBook = _userbookRepository.GetUserbook(userId, bookId) ?? throw new ArgumentException("Livro não encontrado na biblioteca deste usuário.");
+
+        if (userBook.Status != StatusBook.Lido) 
+        {
+            throw new InvalidOperationException("Você não pode avaliar um livro que ainda não começou a ler.");
+        }
+
+        userBook.Review = reviewText?.Trim();
+        _userbookRepository.Update(userBook);
+    }
 }

@@ -49,7 +49,7 @@ public class BookController : ControllerBase
     {
         try
         {
-            var resultAuthor = _BookService.FilterBookByGenre(searchedAuthor, page);
+            var resultAuthor = _BookService.FilterBookByAuthor(searchedAuthor, page);
             return Ok(resultAuthor);
         }
         catch (ArgumentException ex)

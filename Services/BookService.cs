@@ -1,5 +1,3 @@
-
-
 using Skoob.DTOs;
 using Skoob.Interfaces;
 using Skoob.Repositories;
@@ -98,9 +96,7 @@ public class BookService : IBookService {
                 Synopsis = b.Synopsis,
                 PublishedDate = b.PublishingYear,
                 AuthorName = b.Author.Name,
-                Genres = b.Genres
-                    .Select(g => g.Name)
-                    .ToList()
+                Genres = [.. b.Genres.Select(g => g.Name)]
             })
             .ToList();
 
@@ -119,7 +115,7 @@ public class BookService : IBookService {
         var books = _bookRepository.GetAllBooks(page, _pageSize);
 
         var filteredBooks = books
-            .Where(b => b.Title
+            .Where(b => b.Author != null && b.Author.Name 
             .Contains(searchedAuthor, StringComparison.OrdinalIgnoreCase))
             .Select(b => new BookDTO
             {   

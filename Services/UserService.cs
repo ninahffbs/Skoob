@@ -56,6 +56,8 @@ public class UserService : IUserService
             UserName = user.UserName,
             Email = user.Email,
             CreatedAt = user.CreatedAt,
+            TotalBooks = user.Userbooks.Count,
+            BooksRead = user.Userbooks.Count(ub => ub.FinishDate != null),
         };
     }
 
@@ -79,9 +81,7 @@ public class UserService : IUserService
             {
                 BookTitle = ub.Book.Title, 
                 PagesRead = ub.PagesRead ?? 0,
-                PercentComplete = ub.Book.PagesNumber > 0 
-                    ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber) 
-                    : 0,
+                PercentComplete = ub.Book.PagesNumber > 0 ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber) : 0,
                 Status = ub.Status.ToString(), 
                 StartedAt = ub.StartDate 
             }).ToList()

@@ -117,6 +117,20 @@ public class UserBookController : ControllerBase
         }
     }
 
+    [HttpGet("user/{userId}/filter/author")]
+    public IActionResult FilterUserBookByAuthor(Guid userId, [FromQuery] string searchedAuthor)
+    {
+        try
+        {
+            var result = _userBookService.FilterUserBookByAuthor(userId, searchedAuthor);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     [HttpPatch("user/{userId}/book/{bookId}/status")]
     public IActionResult ChangeStatus(Guid userId, Guid bookId, [FromBody] UpdateStatusDTO dto)
     {
@@ -128,6 +142,27 @@ public class UserBookController : ControllerBase
             return Ok(new { message = "Status atualizado com sucesso!" });
         }
         catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPatch("user/{userId}/book/{bookId}/review")]
+    public IActionResult AddReview(Guid userId, Guid bookId, [FromBody] UpdateReviewDTO dto)
+    {
+        if (!ModelState.IsValid) 
+            return BadRequest(ModelState);
+
+        try
+        {
+            _userBookService.UpdateReview(userId, bookId, dto.ReviewText);
+            return Ok(new { message = "Resenha atualizada com sucesso!" });
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex) 
         {
             return BadRequest(new { error = ex.Message });
         }

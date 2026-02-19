@@ -60,18 +60,8 @@ public class UserbookRepository : IUserbookRepository
         _context.SaveChanges();
         return true;
     }
-    public void UpdateReadPages(Userbook userbook)
-    {
-        _context.Userbooks.Update(userbook);
-        _context.SaveChanges();
-    }
-    public void AddRating(Userbook userbook)
-    {
-        _context.Userbooks.Update(userbook);
-        _context.SaveChanges();
-    }
 
-    public void UpdateStatus(Userbook userbook)
+    public void Update(Userbook userbook)
     {
         _context.Userbooks.Update(userbook);
         _context.SaveChanges();
