@@ -136,9 +136,12 @@ public class UserBookController : ControllerBase
         var content = new StringBuilder();
 
         content.AppendLine("======================================");
-        content.AppendLine($"RELATÓRIO ANUAL DE LEITURA - {year}");
+        content.AppendLine($"Relatório anual de leitura de {report.UserName} - {year} :D");
         content.AppendLine("======================================");
         content.AppendLine($"Data de geração: {DateTime.Now}");
+        content.AppendLine();
+        content.AppendLine($"Está conosco desde: {report.MemberSince}");
+        content.AppendLine($"Ou seja, {report.TimeOnPlatform} de muitas leituras");
         content.AppendLine();
         content.AppendLine($"Total de livros lidos: {report.TotalRead}");
         content.AppendLine($"Total de livros em leitura: {report.TotalReading}");

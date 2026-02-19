@@ -2,6 +2,7 @@ namespace Skoob.DTOs;
 
 public class AnnualReadingReportDTO
 {
+    public string UserName { get; set; }
     public int Year { get; set; }
     public int TotalRead { get; set; }
     public int TotalReading { get; set; }
@@ -10,4 +11,6 @@ public class AnnualReadingReportDTO
     public double EstimatedReadingHours { get; set; }
     public double AverageRating { get; set; }
     public string? FavoriteGenre { get; set; }
+    public string MemberSince { get; set; } 
+    public string TimeOnPlatform { get; set; }
 }
