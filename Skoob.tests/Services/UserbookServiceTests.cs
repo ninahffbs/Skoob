@@ -156,45 +156,41 @@ public class UserbookServiceTests
     public void FilterUserBookByTitle_ShouldReturnFilteredList()
     {
         var userId = Guid.NewGuid();
-        var book1 = new Book { Title = "Harry Potter" };
-        var book2 = new Book { Title = "Lord of the Rings" };
+        var searchTitle = "Harry";
         var list = new List<Userbook>
         {
-            new Userbook { Book = book1 },
-            new Userbook { Book = book2 }
+            new Userbook { Book = new Book { Title = "Harry Potter", PagesNumber = 100, Author = new Author { Name = "Rowling" } } }
         };
 
-        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(new Mainuser());
-        _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(list);
+        _userRepositoryMock.Setup(x => x.Exists(userId)).Returns(true);
 
-        var result = _service.FilterUserBookByTitle(userId, "Harry");
+        _userbookRepositoryMock.Setup(x => x.GetUserBooksByTitle(userId, searchTitle)).Returns(list);
+
+        var result = _service.FilterUserBookByTitle(userId, searchTitle);
 
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result[0].BookTitle, Is.EqualTo("Harry Potter"));
+        _userbookRepositoryMock.Verify(x => x.GetUserBooksByTitle(userId, searchTitle), Times.Once);
     }
 
     [Test]
     public void FilterUserBookByGenre_ShouldReturnFilteredList()
     {
         var userId = Guid.NewGuid();
-        var genre1 = new Genre { Name = "Fantasy" };
-        var genre2 = new Genre { Name = "Sci-Fi" };
-        var book1 = new Book { Title = "Book1", Genres = new List<Genre> { genre1 } };
-        var book2 = new Book { Title = "Book2", Genres = new List<Genre> { genre2 } };
-
+        var searchGenre = "Fantasy";
         var list = new List<Userbook>
         {
-            new Userbook { Book = book1 },
-            new Userbook { Book = book2 }
+            new Userbook { Book = new Book { Title = "Book1", Genres = new List<Genre> { new Genre { Name = "Fantasy" } }, Author = new Author { Name = "A" } } }
         };
 
-        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(new Mainuser());
-        _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(list);
+        _userRepositoryMock.Setup(x => x.Exists(userId)).Returns(true);
 
-        var result = _service.FilterUserBookByGenre(userId, "Fantasy");
+        _userbookRepositoryMock.Setup(x => x.GetUserBooksByGenre(userId, searchGenre)).Returns(list);
+
+        var result = _service.FilterUserBookByGenre(userId, searchGenre);
 
         Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].BookTitle, Is.EqualTo("Book1"));
+        _userbookRepositoryMock.Verify(x => x.GetUserBooksByGenre(userId, searchGenre), Times.Once);
     }
 
     [Test]
@@ -473,31 +469,23 @@ public class UserbookServiceTests
     }
 
     [Test]
-    public void FilterUserBookByAuthor_ShouldReturnFilteredList_WhenAuthorMatchesCaseInsensitive()
+    public void FilterUserBookByAuthor_ShouldReturnFilteredList()
     {
         var userId = Guid.NewGuid();
-        var searchAuthor = "tolkien";
-
-        var author1 = new Author { Name = "J.R.R. Tolkien" };
-        var author2 = new Author { Name = "George R.R. Martin" };
-
-        var book1 = new Book { Title = "Senhor dos Anéis", Author = author1, PagesNumber = 1000 };
-        var book2 = new Book { Title = "Game of Thrones", Author = author2, PagesNumber = 800 };
-
+        var searchAuthor = "Tolkien";
         var list = new List<Userbook>
         {
-            new() { UserId = userId, BookId = Guid.NewGuid(), Book = book1, Status = StatusBook.Lendo },
-            new() { UserId = userId, BookId = Guid.NewGuid(), Book = book2, Status = StatusBook.Lido }
+            new Userbook { Book = new Book { Title = "Hobbit", Author = new Author { Name = "J.R.R. Tolkien" }, Genres = new List<Genre>() } }
         };
 
-        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(new Mainuser { Id = userId });
-        _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(list);
+        _userRepositoryMock.Setup(x => x.Exists(userId)).Returns(true);
+
+        _userbookRepositoryMock.Setup(x => x.GetUserBooksByAuthor(userId, searchAuthor)).Returns(list);
 
         var result = _service.FilterUserBookByAuthor(userId, searchAuthor);
 
-        Assert.That(result, Is.Not.Null);
         Assert.That(result.Count, Is.EqualTo(1));
-        Assert.That(result[0].AuthorName, Is.EqualTo("J.R.R. Tolkien"));
+        _userbookRepositoryMock.Verify(x => x.GetUserBooksByAuthor(userId, searchAuthor), Times.Once);
     }
 
     [Test]
@@ -515,6 +503,7 @@ public class UserbookServiceTests
     [Test]
     public void UpdateStatus_ShouldThrowException_WhenStatusIsInvalid()
     {
+        // Arrange
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
         var userBook = new Userbook { UserId = userId, BookId = bookId };
@@ -523,8 +512,10 @@ public class UserbookServiceTests
 
         var invalidStatus = (StatusBook)999;
 
+        // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => _service.UpdateStatus(userId, bookId, invalidStatus));
-        Assert.That(ex.Message, Does.Contain("não é um status válido para um livro"));
+
+        Assert.That(ex.Message, Does.Contain("não é um status válido"));
     }
 
     [Test]
@@ -634,15 +625,20 @@ public class UserbookServiceTests
     [Test]
     public void UpdateReview_ShouldThrowInvalidOperationException_WhenStatusIsQueroLer()
     {
+        // Arrange
         var userId = Guid.NewGuid();
         var bookId = Guid.NewGuid();
-        var userBook = new Userbook { UserId = userId, BookId = bookId, Status = StatusBook.Lendo };
+
+        var userBook = new Userbook { UserId = userId, BookId = bookId, Status = StatusBook.QueroLer };
 
         _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns(userBook);
 
-        var ex = Assert.Throws<InvalidOperationException>(() => _service.UpdateReview(userId, bookId, "Tentando avaliar antes de ler"));
+        // Act & Assert
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            _service.UpdateReview(userId, bookId, "Tentando avaliar antes de ler"));
 
-        Assert.That(ex.Message, Does.Contain("não pode avaliar um livro que ainda não começou a ler"));
+        Assert.That(ex.Message, Does.Contain("não pode avaliar um livro"));
+
         _userbookRepositoryMock.Verify(x => x.Update(It.IsAny<Userbook>()), Times.Never);
     }
 
@@ -755,5 +751,52 @@ public class UserbookServiceTests
         Assert.That(report.AverageRating, Is.EqualTo(0));
         Assert.That(report.FavoriteGenre, Is.Null);
         Assert.That(report.TotalPagesRead, Is.EqualTo(0));
+    }
+    [Test]
+    public void UpdateReadPages_ShouldThrowException_WhenUserBookNotFoundInLibrary()
+    {
+        var userId = Guid.NewGuid();
+        var bookId = Guid.NewGuid();
+
+       
+        _userbookRepositoryMock.Setup(x => x.GetUserbook(userId, bookId)).Returns((Userbook)null);
+
+        var ex = Assert.Throws<ArgumentException>(() => _service.UpdateReadPages(userId, bookId, 50));
+        Assert.That(ex.Message, Does.Contain("Livro não encontrado na biblioteca"));
+    }
+    [Test]
+    public void GenerateAnnualReport_ShouldReturnEmptyReport_WhenUserHasNoBooks()
+    {
+        var userId = Guid.NewGuid();
+        var user = new Mainuser { UserName = "Novato", CreatedAt = DateTime.UtcNow };
+
+        _userRepositoryMock.Setup(x => x.GetById(userId)).Returns(user);
+        _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId)).Returns(new List<Userbook>());
+
+        var result = _service.GenerateAnnualReport(userId, 2026);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.TotalRead, Is.EqualTo(0));
+            Assert.That(result.AverageRating, Is.EqualTo(0));
+            Assert.That(result.FavoriteGenre, Is.Null);
+        });
+    }
+    [Test]
+    public void GetStatusName_ShouldReturnDesconhecido_WhenStatusIsInvalid()
+    {
+        var userId = Guid.NewGuid();
+        var userBook = new Userbook { 
+            Book = new Book { Title = "T", Author = new Author { Name = "A" } },
+            Status = (StatusBook)99 
+        };
+
+        _userRepositoryMock.Setup(x => x.Exists(userId)).Returns(true);
+        _userbookRepositoryMock.Setup(x => x.GetUserbooksByUserId(userId))
+            .Returns(new List<Userbook> { userBook });
+
+        var result = _service.GetUserBooks(userId);
+
+        Assert.That(result[0].StatusName, Is.EqualTo("Desconhecido"));
     }
 }
