@@ -27,20 +27,16 @@ public class UserService : IUserService
 
         var mainUsers = _userRepository.SelectUsers(page, _pageSize);
 
-        return mainUsers.Select(user => new UserResponseDTO
+        return [.. mainUsers.Select(user => new UserResponseDTO
         {
             Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
             CreatedAt = user.CreatedAt,
             TotalBooks = user.Userbooks?.Count ?? 0,
-            BooksRead = user.Userbooks?
-            .Count(ub => ub.Status == StatusBook.Lido) ?? 0,
-            Books = user.Userbooks?
-            .Select(ub => ub.Book.Title)
-            .ToList() ?? new List<string>()
-            
-        }).ToList();
+            BooksRead = user.Userbooks?.Count(ub => ub.FinishDate != null) ?? 0,
+            Books = user.Userbooks?.Select(ub => ub.Book.Title).ToList() ?? []
+        })];
     }
 
     public UserResponseDTO? GetUserById(Guid id)
@@ -56,8 +52,9 @@ public class UserService : IUserService
             UserName = user.UserName,
             Email = user.Email,
             CreatedAt = user.CreatedAt,
-            TotalBooks = user.Userbooks.Count,
-            BooksRead = user.Userbooks.Count(ub => ub.FinishDate != null),
+            TotalBooks = user.Userbooks?.Count ?? 0,
+            BooksRead = user.Userbooks?.Count(ub => ub.FinishDate != null) ?? 0,
+            Books = user.Userbooks?.Select(ub => ub.Book.Title).ToList() ?? []
         };
     }
 
@@ -69,7 +66,6 @@ public class UserService : IUserService
 
         return new UserProfileDTO
         {
-            Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
             CreatedAt = user.CreatedAt,
@@ -77,15 +73,15 @@ public class UserService : IUserService
             BooksRead = user.Userbooks.Count(ub => ub.FinishDate != null),
             
 
-            Books = user.Userbooks.Select(ub => new UserBookSimpleDTO
+            Books = [.. user.Userbooks.Select(ub => new UserBookSimpleDTO
             {
                 BookTitle = ub.Book.Title, 
                 PagesRead = ub.PagesRead ?? 0,
                 PercentComplete = ub.Book.PagesNumber > 0 ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber) : 0,
                 Status = ub.Status.ToString(), 
                 StartedAt = ub.StartDate 
-            }).ToList()
-            
+            })]
+
         };
     }
 

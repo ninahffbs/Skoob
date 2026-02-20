@@ -22,14 +22,15 @@ public class UserRepository : IUserRepository
             .Take(pageSize)
             .ToList();
     }
-
     
-    public Mainuser? GetById(Guid id)
+   public Mainuser? GetById(Guid id)
     {
-        Mainuser? foundUser = _context.Mainusers.Find(id);
-        return foundUser;
+        return _context.Mainusers
+            .Include(u => u.Userbooks)
+            .ThenInclude(ub => ub.Book)
+            .FirstOrDefault(u => u.Id == id);
     }
-
+    
     public Mainuser? GetByName(string username)
     {
         return _context.Mainusers

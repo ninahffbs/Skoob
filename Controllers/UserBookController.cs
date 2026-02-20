@@ -117,46 +117,6 @@ public class UserBookController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
-    [HttpGet("{userId}/annual-report/{year}")]
-    public IActionResult GenerateAnnualReportFile(Guid userId, int year)
-    {
-        var report = _userBookService.GenerateAnnualReport(userId, year);
-
-        string reportsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Reports");
-
-        if (!Directory.Exists(reportsFolder))
-        {
-            Directory.CreateDirectory(reportsFolder);
-        }
-
-        string fileName = $"AnnualReadingReport_{userId}_{year}.txt";
-        string fullPath = Path.Combine(reportsFolder, fileName);
-
-        var content = new StringBuilder();
-
-        content.AppendLine("======================================");
-        content.AppendLine($"Relatório anual de leitura de {report.UserName} - {year} :D");
-        content.AppendLine("======================================");
-        content.AppendLine($"Data de geração: {DateTime.Now}");
-        content.AppendLine();
-        content.AppendLine($"Está conosco desde: {report.MemberSince}");
-        content.AppendLine($"Ou seja, {report.TimeOnPlatform} de muitas leituras");
-        content.AppendLine();
-        content.AppendLine($"Total de livros lidos: {report.TotalRead}");
-        content.AppendLine($"Total de livros em leitura: {report.TotalReading}");
-        content.AppendLine($"Total de livros na lista 'Quero Ler': {report.TotalWantToRead}");
-        content.AppendLine();
-        content.AppendLine($"Total de páginas lidas: {report.TotalPagesRead}");
-        content.AppendLine($"Estimativa de horas lendo: {report.EstimatedReadingHours} horas");
-        content.AppendLine();
-        content.AppendLine($"Média de avaliação: {report.AverageRating}");
-        content.AppendLine($"Gênero favorito: {report.FavoriteGenre}");
-        content.AppendLine("======================================");
-
-        System.IO.File.WriteAllText(fullPath, content.ToString());
-
-        return Ok($"Relatório gerado com sucesso em: {fullPath}");
-    }
     
     [HttpGet("user/{userId}/filter/author")]
     public IActionResult FilterUserBookByAuthor(Guid userId, [FromQuery] string searchedAuthor)
@@ -208,4 +168,45 @@ public class UserBookController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     } 
+
+    [HttpGet("{userId}/annual-report/{year}")]
+    public IActionResult GenerateAnnualReportFile(Guid userId, int year)
+    {
+        var report = _userBookService.GenerateAnnualReport(userId, year);
+
+        string reportsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Reports");
+
+        if (!Directory.Exists(reportsFolder))
+        {
+            Directory.CreateDirectory(reportsFolder);
+        }
+
+        string fileName = $"AnnualReadingReport_{userId}_{year}.txt";
+        string fullPath = Path.Combine(reportsFolder, fileName);
+
+        var content = new StringBuilder();
+
+        content.AppendLine("======================================");
+        content.AppendLine($"Relatório anual de leitura de {report.UserName} - {year} :D");
+        content.AppendLine("======================================");
+        content.AppendLine($"Data de geração: {DateTime.Now}");
+        content.AppendLine();
+        content.AppendLine($"Está conosco desde: {report.MemberSince}");
+        content.AppendLine($"Ou seja, {report.TimeOnPlatform} de muitas leituras");
+        content.AppendLine();
+        content.AppendLine($"Total de livros lidos: {report.TotalRead}");
+        content.AppendLine($"Total de livros em leitura: {report.TotalReading}");
+        content.AppendLine($"Total de livros na lista 'Quero Ler': {report.TotalWantToRead}");
+        content.AppendLine();
+        content.AppendLine($"Total de páginas lidas: {report.TotalPagesRead}");
+        content.AppendLine($"Estimativa de horas lendo: {report.EstimatedReadingHours} horas");
+        content.AppendLine();
+        content.AppendLine($"Média de avaliação: {report.AverageRating}");
+        content.AppendLine($"Gênero favorito: {report.FavoriteGenre}");
+        content.AppendLine("======================================");
+
+        System.IO.File.WriteAllText(fullPath, content.ToString());
+
+        return Ok($"Relatório gerado com sucesso em: {fullPath}");
+    }
 }

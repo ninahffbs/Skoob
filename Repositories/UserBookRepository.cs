@@ -22,15 +22,14 @@ public class UserbookRepository : IUserbookRepository
 
     public List<Userbook> GetUserbooksByUserId(Guid userId)
     {
-        return _context.Userbooks
+        return [.. _context.Userbooks
             .AsNoTracking()
             .Include(ub => ub.Book)
-                .ThenInclude(b => b.Author)
+            .ThenInclude(b => b.Author)
             .Include(ub => ub.Book)
-                .ThenInclude(b => b.Genres)
+            .ThenInclude(b => b.Genres)
             .Where(ub => ub.UserId == userId)
-            .OrderByDescending(ub => ub.StartDate)
-            .ToList();
+            .OrderByDescending(ub => ub.StartDate)];
     }
 
     public List<Userbook> GetUserBooksByTitle(Guid userId, string title)

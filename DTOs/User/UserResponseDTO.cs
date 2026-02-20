@@ -8,7 +8,7 @@ public class UserResponseDTO
     public DateTime? CreatedAt { get; set; }
     public int TotalBooks { get; set; }
     public int BooksRead { get; set; }
-    public List<string> Books { get; set; } = new();
+    public List<string> Books { get; set; } = [];
 }
 
 public class UpdateUserNameRequest
