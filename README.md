@@ -1,5 +1,7 @@
 # Books Clone API - Backend
 
+![skoob_logo](https://github.com/user-attachments/assets/75da25c8-d35a-486a-b702-3dc0bfa9fc4e)
+
 <div align="center">
 
 ![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet)
