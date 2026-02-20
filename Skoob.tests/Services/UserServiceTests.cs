@@ -425,4 +425,96 @@ public class UserServiceTests
         Assert.That(ex.Message,
             Is.EqualTo($"Email '{dto.Email}' já está cadastrado"));
     }
+    [Test]
+    public void GetByUserName_WhenUserHasNoBooks_ShouldReturnDTOWithZeroBooks()
+    {
+        // ARRANGE
+        var user = new Mainuser
+        {
+            Id = Guid.NewGuid(),
+            UserName = "UsuarioSemLivros",
+            Email = "vazio@email.com",
+            CreatedAt = DateTime.UtcNow,
+            Userbooks = new List<Userbook>() // Lista vazia para testar a contagem zero
+        };
+
+        _repositoryMock
+            .Setup(r => r.GetByName("UsuarioSemLivros"))
+            .Returns(user);
+
+        // ACT
+        var result = _service.GetByUserName("UsuarioSemLivros");
+
+        // ASSERT
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.TotalBooks, Is.EqualTo(0));
+        Assert.That(result.BooksRead, Is.EqualTo(0));
+        Assert.That(result.Books, Is.Empty);
+
+        _repositoryMock.Verify(r => r.GetByName("UsuarioSemLivros"), Times.Once);
+    }
+
+    [Test]
+    public void GetByUserName_WhenUserNotFound_ShouldReturnNull()
+    {
+        // ARRANGE
+        _repositoryMock
+            .Setup(r => r.GetByName("Inexistente"))
+            .Returns((Mainuser?)null);
+
+        // ACT
+        var result = _service.GetByUserName("Inexistente");
+
+        // ASSERT
+        Assert.That(result, Is.Null);
+    }
+    [Test]
+    public void GetUsers_WithBooks_ShouldMapBooksReadAndTitlesCorrectly()
+    {
+        // ARRANGE
+        var userId = Guid.NewGuid();
+        var list = new List<Mainuser>
+        {
+            new Mainuser
+            {
+                Id = userId,
+                UserName = "Nina",
+                Email = "nina@email.com",
+                CreatedAt = DateTime.UtcNow,
+                Userbooks = new List<Userbook>
+                {
+                    new Userbook 
+                    { 
+                        FinishDate = DateTime.UtcNow, // Este conta no BooksRead
+                        Book = new Book { Title = "Livro Lido" } 
+                    },
+                    new Userbook 
+                    { 
+                        FinishDate = null, // Este NÃO conta no BooksRead
+                        Book = new Book { Title = "Livro Lendo" } 
+                    }
+                }
+            }
+        };
+
+        _repositoryMock.Setup(x => x.SelectUsers(1, 10)).Returns(list);
+
+        // ACT
+        var result = _service.GetUsers(1);
+
+        // ASSERT
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Count, Is.EqualTo(1));
+            // Testa a linha: BooksRead = user.Userbooks?.Count(ub => ub.FinishDate != null)
+            Assert.That(result[0].BooksRead, Is.EqualTo(1), "Deveria ter contado apenas 1 livro lido.");
+            
+            // Testa a linha: Books = user.Userbooks?.Select(ub => ub.Book.Title).ToList()
+            Assert.That(result[0].Books, Contains.Item("Livro Lido"));
+            Assert.That(result[0].Books, Contains.Item("Livro Lendo"));
+            Assert.That(result[0].Books!.Count, Is.EqualTo(2));
+        });
+
+        _repositoryMock.Verify(x => x.SelectUsers(1, 10), Times.Once);
+    }
 }
