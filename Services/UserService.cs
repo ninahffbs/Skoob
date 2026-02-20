@@ -79,7 +79,9 @@ public class UserService : IUserService
                 PagesRead = ub.PagesRead ?? 0,
                 PercentComplete = ub.Book.PagesNumber > 0 ? (int)((ub.PagesRead ?? 0) * 100.0 / ub.Book.PagesNumber) : 0,
                 Status = ub.Status.ToString(), 
-                StartedAt = ub.StartDate 
+                StartedAt = ub.StartDate,
+                Rating = ub.Rating,
+                Review = ub.Review
             })]
 
         };

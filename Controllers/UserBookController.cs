@@ -174,16 +174,6 @@ public class UserBookController : ControllerBase
     {
         var report = _userBookService.GenerateAnnualReport(userId, year);
 
-        string reportsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Reports");
-
-        if (!Directory.Exists(reportsFolder))
-        {
-            Directory.CreateDirectory(reportsFolder);
-        }
-
-        string fileName = $"AnnualReadingReport_{userId}_{year}.txt";
-        string fullPath = Path.Combine(reportsFolder, fileName);
-
         var content = new StringBuilder();
 
         content.AppendLine("======================================");
@@ -205,8 +195,9 @@ public class UserBookController : ControllerBase
         content.AppendLine($"Gênero favorito: {report.FavoriteGenre}");
         content.AppendLine("======================================");
 
-        System.IO.File.WriteAllText(fullPath, content.ToString());
-
-        return Ok($"Relatório gerado com sucesso em: {fullPath}");
+        byte[] fileBytes = Encoding.UTF8.GetBytes(content.ToString());
+        string fileName = $"AnnualReadingReport_{userId}_{year}.txt";
+        
+        return File(fileBytes, "text/plain", fileName);
     }
 }

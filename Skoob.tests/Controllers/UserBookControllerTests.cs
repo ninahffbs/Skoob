@@ -523,11 +523,10 @@ public class UserBookControllerTests
         // Act & Assert
         Assert.Throws<Exception>(() => _controller.GenerateAnnualReportFile(userId, year));
     }
-  
+
     [Test]
     public void GenerateAnnualReportFile_WithValidData_ReturnsOkWithSuccessMessage()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var year = 2026;
         var expectedReport = new AnnualReadingReportDTO
@@ -548,14 +547,13 @@ public class UserBookControllerTests
             .Setup(s => s.GenerateAnnualReport(userId, year))
             .Returns(expectedReport);
 
-        // Act
         var result = _controller.GenerateAnnualReportFile(userId, year);
 
-        // Assert
-        Assert.That(result, Is.TypeOf<OkObjectResult>());
-        var okResult = result as OkObjectResult;
-        Assert.That(okResult!.Value!.ToString(), Does.Contain("Relatório gerado com sucesso"));
-        Assert.That(okResult.Value.ToString(), Does.Contain($"AnnualReadingReport_{userId}_{year}.txt"));
+        var fileResult = result as FileContentResult;
+        
+        Assert.That(fileResult, Is.Not.Null, "Deveria retornar um FileContentResult para o download do arquivo.");
+        Assert.That(fileResult!.ContentType, Is.EqualTo("text/plain"), "O MIME type do relatório deve ser texto plano.");
+        Assert.That(fileResult.FileDownloadName, Does.Contain(year.ToString()), "O nome do arquivo deve conter o ano.");
 
         _mockUserBookService.Verify(s => s.GenerateAnnualReport(userId, year), Times.Once);
     }

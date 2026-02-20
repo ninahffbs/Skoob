@@ -18,5 +18,7 @@ public class UserBookSimpleDTO
     public int PagesRead { get; set; }
     public int PercentComplete { get; set; }
     public string Status { get; set; } = null!; 
+    public short? Rating { get; set; }
+    public string? Review { get; set; }
     public DateTime? StartedAt { get; set; }
 }
